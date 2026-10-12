@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>グランドメイキング | 少年サッカー・8人制コート設営現場支援ツール</title>
+  <meta name="description" content="小学校校庭や河川敷など限られたスペースに合わせた少年サッカー（8人制・U-8・U-10）コート設営支援ツール「グランドメイキング」。寸法自動計算、メジャー目盛り表、3:4:5直角出し、動的手順書を完備。">
+  <!-- PWA & Mobile Web App Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="グランドメイキング">
+  <meta name="theme-color" content="#15803d">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pitch: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              dark: '#052e16'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 屋外直射日光モード（極限ハイコントラスト）用スタイル */
+    .sun-mode {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+    }
+    .sun-mode .sun-card {
+      background-color: #ffffff !important;
+      border: 3px solid #000000 !important;
+      color: #000000 !important;
+      box-shadow: none !important;
+    }
+    .sun-mode .sun-header {
+      background-color: #000000 !important;
+      color: #ffffff !important;
+      border-bottom: 3px solid #ffffff !important;
+    }
+    .sun-mode .sun-text-bold {
+      font-weight: 900 !important;
+      color: #000000 !important;
+    }
+
+    /* 現場での片手操作用タップ改善 */
+    button, input, select {
+      touch-action: manipulation;
+    }
+    
+    /* スライダーカスタム */
+    input[type=range] {
+      -webkit-appearance: none;
+      height: 12px;
+      border-radius: 6px;
+      background: #e2e8f0;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #15803d;
+      cursor: pointer;
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    }
+    .sun-mode input[type=range]::-webkit-slider-thumb {
+      background: #000000;
+      border: 3px solid #ffffff;
+      outline: 2px solid #000000;
+    }
+
+    /* 印刷スタイル（A4用紙にコート図・目盛り表・手順書を綺麗に印刷） */
+    @media print {
+      .no-print { display: none !important; }
+      body {
+        background: white !important;
+        color: black !important;
+        padding-bottom: 0 !important;
+        font-size: 10pt;
+      }
+      .sun-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      /* 印刷時は非表示タブもすべて展開 */
+      #tabContentPitch, #tabContentTape, #tabContentSteps {
+        display: block !important;
+        margin-bottom: 20px;
+      }
+      .print-page-break {
+        page-break-before: always;
+        break-before: always;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen pb-24 font-sans transition-colors duration-200">
+
+  <!-- ヘッダー -->
+  <header class="bg-pitch-800 text-white sticky top-0 z-40 shadow-md transition-colors duration-200">
+    <div class="max-w-md mx-auto px-3 py-2.5 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl">⚽</span>
+        <div>
+          <h1 class="text-base font-extrabold tracking-tight leading-tight">グランドメイキング</h1>
+          <p class="text-[10px] text-pitch-100 font-medium">少年サッカー・8人制 コート設営ナビ</p>
+        </div>
+      </div>
+      
+      <!-- ヘッダー便利機能ボタン -->
+      <div class="flex items-center space-x-1.5 no-print">
+        <!-- 屋外直射日光モード切替 -->
+        <button id="toggleSunBtn" title="直射日光モード切替" class="px-2 py-1.5 rounded-lg bg-pitch-900/80 hover:bg-black text-amber-300 font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95">
+          <span id="sunIcon">☀️</span>
+          <span class="text-[11px] hidden sm:inline" id="sunLabel">直射日光</span>
+        </button>
+
+        <!-- 画面常時点灯 (Wake Lock) -->
+        <button id="wakeLockBtn" title="画面のスリープ防止" class="px-2 py-1.5 rounded-lg bg-pitch-900/80 hover:bg-black text-white font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95">
+          <span id="wakeLockIcon">💡</span>
+          <span class="text-[11px] hidden sm:inline" id="wakeLockText">常時ON</span>
+        </button>
+
+        <!-- LINE共有用コピー -->
+        <button id="shareSummaryBtn" title="設営寸法をコピー" class="p-1.5 rounded-lg bg-pitch-700 hover:bg-pitch-600 text-white font-bold text-xs border border-pitch-600 transition active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+        </button>
+
+        <!-- 印刷 / PDF -->
+        <button onclick="window.print()" title="印刷・PDF保存" class="p-1.5 rounded-lg bg-pitch-700 hover:bg-pitch-600 text-white font-bold text-xs border border-pitch-600 transition active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインコンテナ（スマホ最適化: max-w-md） -->
+  <main class="max-w-md mx-auto px-3 py-3 space-y-3">
+
+    <!-- 1. プリセット選択ボタン群 -->
+    <section class="sun-card bg-white rounded-xl p-3 shadow-sm border border-slate-200">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center">
+          <svg class="w-3.5 h-3.5 mr-1 text-pitch-700" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path></svg>
+          ワンタップ・プリセット
+        </span>
+        <span class="text-[11px] text-pitch-700 font-bold bg-pitch-50 px-2 py-0.5 rounded-full" id="activePresetBadge">カスタム</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <button type="button" data-preset="u8" class="preset-btn py-2 px-1 text-center rounded-lg border-2 border-slate-200 font-bold text-xs hover:border-pitch-600 transition active:scale-95">
+          <div class="text-[13px] text-slate-800">U-8 ミニ</div>
+          <div class="text-[10px] text-slate-500">50 × 32m</div>
+        </button>
+        <button type="button" data-preset="u10" class="preset-btn py-2 px-1 text-center rounded-lg border-2 border-slate-200 font-bold text-xs hover:border-pitch-600 transition active:scale-95">
+          <div class="text-[13px] text-slate-800">U-10 標準</div>
+          <div class="text-[10px] text-slate-500">60 × 40m</div>
+        </button>
+        <button type="button" data-preset="official" class="preset-btn py-2 px-1 text-center rounded-lg border-2 border-pitch-600 bg-pitch-50 font-bold text-xs hover:border-pitch-600 transition active:scale-95">
+          <div class="text-[13px] text-pitch-800">公式 8人制</div>
+          <div class="text-[10px] text-pitch-700 font-semibold">68 × 50m</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. コート寸法 入力パネル -->
+    <section class="sun-card bg-white rounded-xl p-3.5 shadow-sm border border-slate-200 space-y-3">
+      <!-- 縦の長さ（タッチライン） -->
+      <div>
+        <div class="flex justify-between items-baseline mb-1">
+          <label for="lengthNumberInput" class="text-xs font-bold text-slate-700 flex items-center">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-600 mr-1.5 inline-block"></span>
+            コート縦（タッチライン長）
+          </label>
+          <div class="flex items-center space-x-1">
+            <input type="number" id="lengthNumberInput" min="30" max="75" step="0.5" value="50.0" class="w-20 text-right text-2xl font-black text-slate-900 tracking-tight bg-slate-50 border border-slate-300 rounded px-1 py-0.5 focus:bg-white focus:ring-2 focus:ring-pitch-500 outline-none">
+            <span class="text-xs font-bold text-slate-500">m</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button type="button" class="step-btn w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-xl text-slate-700 flex items-center justify-center border border-slate-300 active:scale-95" onclick="adjustValue('length', -1)">−</button>
+          <input type="range" id="lengthRangeInput" min="30" max="75" step="0.5" value="50" class="w-full">
+          <button type="button" class="step-btn w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-xl text-slate-700 flex items-center justify-center border border-slate-300 active:scale-95" onclick="adjustValue('length', 1)">＋</button>
+        </div>
+        <div class="flex justify-between text-[10px] text-slate-400 mt-0.5 px-1 font-semibold">
+          <span>最小 30m</span>
+          <span>推奨: 50〜68m</span>
+          <span>最大 75m</span>
+        </div>
+      </div>
+
+      <!-- 横の長さ（ゴールライン） -->
+      <div class="pt-1 border-t border-slate-100">
+        <div class="flex justify-between items-baseline mb-1">
+          <label for="widthNumberInput" class="text-xs font-bold text-slate-700 flex items-center">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 mr-1.5 inline-block"></span>
+            コート横（ゴールライン幅）
+          </label>
+          <div class="flex items-center space-x-1">
+            <input type="number" id="widthNumberInput" min="20" max="55" step="0.5" value="32.0" class="w-20 text-right text-2xl font-black text-slate-900 tracking-tight bg-slate-50 border border-slate-300 rounded px-1 py-0.5 focus:bg-white focus:ring-2 focus:ring-pitch-500 outline-none">
+            <span class="text-xs font-bold text-slate-500">m</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button type="button" class="step-btn w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-xl text-slate-700 flex items-center justify-center border border-slate-300 active:scale-95" onclick="adjustValue('width', -1)">−</button>
+          <input type="range" id="widthRangeInput" min="20" max="55" step="0.5" value="32" class="w-full">
+          <button type="button" class="step-btn w-10 h-10 rounded-lg bg-slate-100 hover:bg-slate-200 font-black text-xl text-slate-700 flex items-center justify-center border border-slate-300 active:scale-95" onclick="adjustValue('width', 1)">＋</button>
+        </div>
+        <div class="flex justify-between text-[10px] text-slate-400 mt-0.5 px-1 font-semibold">
+          <span>最小 20m</span>
+          <span>推奨: 32〜50m</span>
+          <span>最大 55m</span>
+        </div>
+      </div>
+
+      <!-- 詳細設定（ゴール幅 & 丸め単位） -->
+      <div class="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">🥅 ゴール幅</label>
+          <select id="goalWidthSelect" class="w-full py-1.5 px-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 text-xs">
+            <option value="5.0" selected>5.0m (公式少年用)</option>
+            <option value="4.0">4.0m (フットサル/ミニ)</option>
+            <option value="3.0">3.0m (簡易ミニ)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">📏 寸法の丸め単位</label>
+          <select id="roundStepSelect" class="w-full py-1.5 px-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800 text-xs">
+            <option value="0.1" selected>0.1m 単位 (精密)</option>
+            <option value="0.5">0.5m 単位 (測りやすい)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. タブナビゲーション（3モード切替） -->
+    <nav class="sun-card bg-slate-200 p-1 rounded-xl grid grid-cols-3 gap-1 text-center font-bold text-xs select-none no-print">
+      <button type="button" id="tabBtnPitch" class="tab-btn py-2 px-1 rounded-lg bg-white text-pitch-800 shadow-sm transition flex flex-col items-center justify-center space-y-0.5">
+        <span class="text-base">📐</span>
+        <span class="text-[11px]">コート図面</span>
+      </button>
+      <button type="button" id="tabBtnTape" class="tab-btn py-2 px-1 rounded-lg text-slate-600 hover:text-slate-900 transition flex flex-col items-center justify-center space-y-0.5">
+        <span class="text-base">📏</span>
+        <span class="text-[11px]">メジャー目盛り</span>
+      </button>
+      <button type="button" id="tabBtnSteps" class="tab-btn py-2 px-1 rounded-lg text-slate-600 hover:text-slate-900 transition flex flex-col items-center justify-center space-y-0.5">
+        <span class="text-base">📋</span>
+        <span class="text-[11px]">設営手順書</span>
+      </button>
+    </nav>
+
+    <!-- ==================== タブ 1: コート図面 & 寸法サマリー ==================== -->
+    <div id="tabContentPitch" class="space-y-3">
+      <!-- リアルタイム縮尺連動SVGコート図 -->
+      <section class="sun-card bg-white rounded-xl p-3 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center space-x-1.5">
+            <span class="font-extrabold text-xs text-slate-800">ピッチ全体図</span>
+            <span class="text-[10px] bg-slate-100 text-slate-600 font-semibold px-1.5 py-0.5 rounded">比率リアルタイム連動</span>
+          </div>
+          <!-- 向き切り替え（縦/横） -->
+          <button id="toggleOrientationBtn" class="no-print text-[11px] font-bold text-pitch-700 bg-pitch-50 px-2 py-1 rounded-lg border border-pitch-200 flex items-center space-x-1 hover:bg-pitch-100 active:scale-95">
+            <span id="orientationIcon">🔄</span>
+            <span id="orientationLabel">横向き表示</span>
+          </button>
+        </div>
+
+        <!-- SVG描画コンテナ -->
+        <div id="svgContainer" class="w-full flex justify-center items-center bg-pitch-900 rounded-lg p-2 overflow-hidden border border-pitch-800 shadow-inner min-h-[290px]">
+          <!-- JSで動的にSVGを挿入 -->
+        </div>
+
+        <!-- タップした部位の詳細ポップアップカード -->
+        <div id="pitchInspectCard" class="mt-2.5 p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs hidden">
+          <div class="flex justify-between items-center">
+            <span class="font-black text-slate-900" id="inspectTitle">エリア名</span>
+            <span class="font-black text-pitch-700 text-sm" id="inspectValue">0.0m</span>
+          </div>
+          <p class="text-[11px] text-slate-600 mt-0.5" id="inspectDesc">説明テキスト</p>
+        </div>
+      </section>
+
+      <!-- 主要計算寸法カードグリッド -->
+      <section class="grid grid-cols-2 gap-2 text-slate-800">
+        <!-- 対角線（四角形歪みチェック） -->
+        <div class="sun-card bg-white p-3 rounded-xl border border-slate-200 shadow-sm col-span-2 flex items-center justify-between">
+          <div>
+            <div class="flex items-center space-x-1 text-xs font-bold text-slate-500">
+              <span>📐 対角線の長さ</span>
+              <span class="text-[10px] text-amber-700 bg-amber-50 px-1 rounded font-semibold">歪み確認必須</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">対角のコーナー同士を測り長方形の歪みを確認</p>
+          </div>
+          <div class="text-right">
+            <span class="text-2xl font-black text-blue-600 tracking-tight" id="diagonalDisplay">59.36</span>
+            <span class="text-xs font-bold text-slate-500">m</span>
+          </div>
+        </div>
+
+        <!-- 直角出し 3:4:5 推奨セット -->
+        <div class="sun-card bg-white p-3 rounded-xl border border-slate-200 shadow-sm col-span-2">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs font-bold text-slate-700 flex items-center">
+              <span>🎯 おすすめ直角出し (3:4:5)</span>
+            </span>
+            <span class="text-[10px] bg-pitch-100 text-pitch-800 font-black px-1.5 py-0.5 rounded" id="pythMultiplier">4倍 (12-16-20m)</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-center my-2">
+            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+              <div class="text-[10px] text-slate-500 font-semibold">ゴール側 (3)</div>
+              <div class="text-base font-black text-slate-900" id="pythA">12.0<span class="text-[10px] font-normal">m</span></div>
+            </div>
+            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+              <div class="text-[10px] text-slate-500 font-semibold">タッチ側 (4)</div>
+              <div class="text-base font-black text-slate-900" id="pythB">16.0<span class="text-[10px] font-normal">m</span></div>
+            </div>
+            <div class="bg-amber-50 p-1.5 rounded-lg border border-amber-300">
+              <div class="text-[10px] text-amber-800 font-semibold">斜辺交点 (5)</div>
+              <div class="text-base font-black text-amber-700" id="pythC">20.0<span class="text-[10px] font-normal">m</span></div>
+            </div>
+          </div>
+          <!-- 直角出しセット選択プルダウン -->
+          <div class="flex items-center justify-between text-[11px] pt-1 no-print">
+            <span class="text-slate-500">他のサイズに変更:</span>
+            <select id="pythSelect" class="bg-slate-50 border border-slate-300 rounded font-bold px-2 py-0.5 text-slate-700 text-xs"></select>
+          </div>
+        </div>
+
+        <!-- ペナルティエリア寸法 -->
+        <div class="sun-card bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-bold text-slate-500">🔲 ペナルティエリア</div>
+          <div class="mt-1 flex justify-between items-baseline">
+            <span class="text-[11px] text-slate-600">深さ × 横幅</span>
+            <span class="text-sm font-black text-slate-900" id="paDimension">8.0 × 20.8m</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5">比率: 縦16% × 横65%</div>
+        </div>
+
+        <!-- ゴールエリア寸法 -->
+        <div class="sun-card bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-bold text-slate-500">▫️ ゴールエリア</div>
+          <div class="mt-1 flex justify-between items-baseline">
+            <span class="text-[11px] text-slate-600">深さ × 横幅</span>
+            <span class="text-sm font-black text-slate-900" id="gaDimension">4.0 × 12.8m</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5">比率: 4.0m × 横40%</div>
+        </div>
+
+        <!-- ペナルティマーク (PK) -->
+        <div class="sun-card bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-bold text-slate-500">🎯 PKマーク位置</div>
+          <div class="mt-1 flex justify-between items-baseline">
+            <span class="text-[11px] text-slate-600">ラインから</span>
+            <span class="text-base font-black text-pitch-700" id="pkDistanceDisplay">6.0m</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5">PA深さ × 0.75</div>
+        </div>
+
+        <!-- センターサークル半径 -->
+        <div class="sun-card bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-bold text-slate-500">⭕ センターサークル</div>
+          <div class="mt-1 flex justify-between items-baseline">
+            <span class="text-[11px] text-slate-600">半径 (R)</span>
+            <span class="text-base font-black text-pitch-700" id="circleRadiusDisplay">5.8m</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5">アーク半径: <span id="penaltyArcDisplay">5.0m</span></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== タブ 2: メジャー目盛り表 (片道累計) ==================== -->
+    <div id="tabContentTape" class="space-y-3 hidden">
+      <!-- 現場向け案内バナー -->
+      <div class="sun-card bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-amber-900 text-xs">
+        <p class="font-bold flex items-center">
+          <span class="text-base mr-1">💡</span>現場設営の最速テクニック
+        </p>
+        <p class="mt-1 text-[11px] text-amber-800 leading-relaxed">
+          メジャーの<strong>「0m金具」をコーナーペグに固定</strong>し、反対コーナーまで一直線にピンと張ってから、<strong>下記の累計目盛り位置に順にペグ（印）を打つ</strong>と一切の手戻りなく1回で完了します。
+        </p>
+      </div>
+
+      <!-- 目盛り表示対象（ゴールライン / タッチライン）切替 -->
+      <section class="sun-card bg-white rounded-xl p-3 shadow-sm border border-slate-200 space-y-2.5">
+        <div class="flex items-center justify-between no-print">
+          <div class="inline-flex rounded-lg bg-slate-100 p-1 font-bold text-xs">
+            <button type="button" id="tapeTargetGoal" class="py-1 px-3 rounded-md bg-white text-pitch-800 shadow-sm transition">
+              ゴールライン (横幅)
+            </button>
+            <button type="button" id="tapeTargetTouch" class="py-1 px-3 rounded-md text-slate-600 hover:text-slate-900 transition">
+              タッチライン (縦幅)
+            </button>
+          </div>
+
+          <!-- 測定方向反転ボタン（左から右 / 右から左） -->
+          <button type="button" id="toggleReverseTape" class="text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-300 flex items-center space-x-1 active:scale-95">
+            <span>⇄</span>
+            <span id="tapeDirLabel">左 → 右</span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
+          <span id="tapeTotalLengthDesc">測定全長: 32.0m</span>
+          <span class="text-pitch-700 font-bold" id="checkedCountDisplay">0 / 9 完了</span>
+        </div>
+
+        <!-- 視覚的メジャースケールミニバー -->
+        <div id="tapeVisualGauge" class="w-full bg-slate-100 rounded-lg p-2 border border-slate-200 overflow-x-auto">
+          <!-- JSで目盛り位置のピンを描画 -->
+        </div>
+
+        <!-- 目盛りリストテーブル（片手で見やすい特大リスト） -->
+        <div id="tapeMarksList" class="space-y-2">
+          <!-- JSで動的レンダリング -->
+        </div>
+
+        <!-- チェックリセットボタン -->
+        <div class="pt-2 text-center no-print">
+          <button type="button" id="resetTapeChecksBtn" class="text-xs font-semibold text-slate-400 hover:text-slate-600 py-1 px-3 rounded border border-slate-200">
+            チェックをすべてリセット
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== タブ 3: 設営手順書 (STEP 1〜6) ==================== -->
+    <div id="tabContentSteps" class="space-y-3 hidden">
+      <!-- 手順ヘッダー & プログレス -->
+      <section class="sun-card bg-white rounded-xl p-3 shadow-sm border border-slate-200">
+        <div class="flex justify-between items-center mb-1.5">
+          <h2 class="font-black text-sm text-slate-800 flex items-center">
+            <span class="text-pitch-600 mr-1.5">📋</span>動的設営手順ガイド
+          </h2>
+          <span class="text-xs font-black text-pitch-700 bg-pitch-50 px-2 py-0.5 rounded-full" id="stepsProgressText">0 / 6 完了</span>
+        </div>
+        <!-- プログレスバー -->
+        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
+          <div id="stepsProgressBar" class="bg-pitch-600 h-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1.5">
+          入力された寸法（縦<span class="font-bold text-slate-700 step-val-length">50.0</span>m × 横<span class="font-bold text-slate-700 step-val-width">32.0</span>m）が反映された手順書です。現場でチェックを入れながら進めてください。
+        </p>
+      </section>
+
+      <!-- 全完了お祝いバナー（初期は非表示） -->
+      <div id="allDoneBanner" class="sun-card bg-gradient-to-r from-emerald-600 to-pitch-700 text-white p-4 rounded-xl shadow-md text-center hidden animate-bounce">
+        <div class="text-3xl mb-1">🎉 設営完了！</div>
+        <p class="text-xs font-bold">全ステップのチェックが完了しました。素晴らしい試合を！</p>
+      </div>
+
+      <!-- ステップカード一覧（JSで動的生成） -->
+      <div id="stepCardsContainer" class="space-y-3">
+        <!-- JSで各ステップを描画 -->
+      </div>
+
+      <!-- 手順リセットボタン -->
+      <div class="text-center pt-2 no-print">
+        <button type="button" id="resetStepsBtn" class="text-xs font-semibold text-slate-400 hover:text-slate-600 py-1.5 px-4 rounded-lg border border-slate-200 bg-white">
+          手順のチェックをすべてリセット
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 固定ボトムバー（主要寸法サマリーがいつでも見える） -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 py-2 px-3 z-30 shadow-lg no-print">
+    <div class="max-w-md mx-auto flex items-center justify-between text-xs">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-slate-500 text-[11px]">現在:</span>
+        <span class="font-black text-slate-900"><span id="footerLength">50.0</span>m × <span id="footerWidth">32.0</span>m</span>
+        <span class="text-slate-300">|</span>
+        <span class="text-slate-600 text-[11px]">対角: <strong class="text-blue-600" id="footerDiag">59.36</strong>m</span>
+      </div>
+      <button type="button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="text-slate-500 hover:text-slate-800 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 py-1 px-2.5 rounded-lg active:scale-95">
+        ▲ TOP
+      </button>
+    </div>
+  </footer>
+
+  <!-- コピー完了トースト通知 -->
+  <div id="toastNotification" class="fixed top-14 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold py-2 px-4 rounded-full shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center space-x-1.5">
+    <span>✅</span>
+    <span id="toastMessage">設営寸法をコピーしました</span>
+  </div>
+
+  <!-- JavaScript ロジック -->
+  <script>
+    /* ==========================================================================
+       状態管理 & 初期設定
+       ========================================================================== */
+    const state = {
+      length: 50.0,
+      width: 32.0,
+      goalWidth: 5.0,
+      roundStep: 0.1,
+      pythMultiplier: 4, // 3:4:5 の倍率 (デフォルト 4 = 12-16-20m)
+      currentTab: 'pitch', // 'pitch' | 'tape' | 'steps'
+      tapeTarget: 'goal',  // 'goal' | 'touch'
+      tapeReverse: false,
+      svgOrientation: 'landscape', // 'portrait' | 'landscape'
+      sunMode: false,
+      wakeLockActive: false,
+      selectedPitchPart: null,
+      tapeChecks: {},
+      stepChecks: {}
+    };
+
+    let wakeLockSentinel = null;
+
+    /* プリセット定義 */
+    const PRESETS = {
+      u8: { length: 50.0, width: 32.0, goalWidth: 5.0, name: 'U-8 ミニ (50×32m)' },
+      u10: { length: 60.0, width: 40.0, goalWidth: 5.0, name: 'U-10 標準 (60×40m)' },
+      official: { length: 68.0, width: 50.0, goalWidth: 5.0, name: '公式 8人制 (68×50m)' }
+    };
+
+    /* ピタゴラス数 3:4:5 テーブル */
+    const PYTHAGORAS_TABLE = [
+      { k: 1, a: 3, b: 4, c: 5, label: '1倍 (3m - 4m - 5m)' },
+      { k: 2, a: 6, b: 8, c: 10, label: '2倍 (6m - 8m - 10m)' },
+      { k: 3, a: 9, b: 12, c: 15, label: '3倍 (9m - 12m - 15m)' },
+      { k: 4, a: 12, b: 16, c: 20, label: '4倍 (12m - 16m - 20m) ★推奨' },
+      { k: 5, a: 15, b: 20, c: 25, label: '5倍 (15m - 20m - 25m)' },
+      { k: 6, a: 18, b: 24, c: 30, label: '6倍 (18m - 24m - 30m)' },
+      { k: 8, a: 24, b: 32, c: 40, label: '8倍 (24m - 32m - 40m)' },
+      { k: 10, a: 30, b: 40, c: 50, label: '10倍 (30m - 40m - 50m)' }
+    ];
+
+    /* ==========================================================================
+       計算ロジック
+       ========================================================================== */
+    function roundValue(val, step = state.roundStep) {
+      return Number((Math.round(val / step) * step).toFixed(2));
+    }
+
+    function calculatePitchData() {
+      const len = state.length;
+      const wid = state.width;
+      const gw = state.goalWidth;
+
+      // 公式プリセット (68m × 50m) の特例フィット（JFA公認8人制寸法を反映）
+      const isOfficial = (len === 68.0 && wid === 50.0);
+
+      // 対角線
+      const diagonal = Number(Math.hypot(len, wid).toFixed(2));
+
+      // ペナルティエリア (PA)
+      // 要件: 深さ 縦×0.16 / 横幅 横×0.65
+      let paDepth = isOfficial ? 12.0 : roundValue(len * 0.16);
+      let paWidth = isOfficial ? 32.0 : roundValue(wid * 0.65);
+
+      // ゴールエリア (GA)
+      // 要件: 深さ 4.0m (縦<40mは3.0m) / 横幅 横×0.40
+      let gaDepth = isOfficial ? 4.0 : (len < 40.0 ? 3.0 : 4.0);
+      let gaWidth = isOfficial ? 16.0 : roundValue(wid * 0.40);
+
+      // ペナルティマーク (PK)
+      // 要件: ゴールラインから PA深さ × 0.75 (公式8m目安、低学年5〜6m)
+      let pkDist = isOfficial ? 8.0 : roundValue(Math.min(Math.max(paDepth * 0.75, 5.0), 8.0));
+
+      // センターサークル半径
+      // 要件: 横 × 0.18 (最大7.0m、最小5.0m)
+      let circleRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(wid * 0.18, 5.0), 7.0));
+
+      // ペナルティアーク半径
+      // 要件: PKマークから半径5〜6m
+      let penaltyArcRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(circleRadius * 0.85, 5.0), 6.0));
+
+      // コーナーアーク (公式1.0m)
+      const cornerArcRadius = 1.0;
+
+      // 直角出し 3:4:5
+      const currentPyth = PYTHAGORAS_TABLE.find(p => p.k === state.pythMultiplier) || PYTHAGORAS_TABLE[3];
+
+      return {
+        length: len,
+        width: wid,
+        goalWidth: gw,
+        diagonal,
+        paDepth,
+        paWidth,
+        gaDepth,
+        gaWidth,
+        pkDist,
+        circleRadius,
+        penaltyArcRadius,
+        cornerArcRadius,
+        pyth: currentPyth
+      };
+    }
+
+    /* ==========================================================================
+       UI 更新関数
+       ========================================================================== */
+    function updateAllUI() {
+      const data = calculatePitchData();
+
+      // 数値表示・入力同期
+      document.getElementById('lengthNumberInput').value = data.length.toFixed(1);
+      document.getElementById('widthNumberInput').value = data.width.toFixed(1);
+      document.getElementById('lengthRangeInput').value = data.length;
+      document.getElementById('widthRangeInput').value = data.width;
+
+      document.getElementById('footerLength').textContent = data.length.toFixed(1);
+      document.getElementById('footerWidth').textContent = data.width.toFixed(1);
+      document.getElementById('footerDiag').textContent = data.diagonal.toFixed(2);
+
+      // サマリーカード更新
+      document.getElementById('diagonalDisplay').textContent = data.diagonal.toFixed(2);
+      document.getElementById('paDimension').textContent = `${data.paDepth.toFixed(1)} × ${data.paWidth.toFixed(1)}m`;
+      document.getElementById('gaDimension').textContent = `${data.gaDepth.toFixed(1)} × ${data.gaWidth.toFixed(1)}m`;
+      document.getElementById('pkDistanceDisplay').textContent = `${data.pkDist.toFixed(1)}m`;
+      document.getElementById('circleRadiusDisplay').textContent = `${data.circleRadius.toFixed(1)}m`;
+      document.getElementById('penaltyArcDisplay').textContent = `${data.penaltyArcRadius.toFixed(1)}m`;
+
+      // ピタゴラス更新
+      document.getElementById('pythA').innerHTML = `${data.pyth.a.toFixed(1)}<span class="text-[10px] font-normal">m</span>`;
+      document.getElementById('pythB').innerHTML = `${data.pyth.b.toFixed(1)}<span class="text-[10px] font-normal">m</span>`;
+      document.getElementById('pythC').innerHTML = `${data.pyth.c.toFixed(1)}<span class="text-[10px] font-normal">m</span>`;
+      document.getElementById('pythMultiplier').textContent = `${data.pyth.k}倍 (${data.pyth.a}-${data.pyth.b}-${data.pyth.c}m)`;
+
+      // 手順書内の動的数値
+      document.querySelectorAll('.step-val-length').forEach(el => el.textContent = data.length.toFixed(1));
+      document.querySelectorAll('.step-val-width').forEach(el => el.textContent = data.width.toFixed(1));
+
+      // ピッチSVGの再描画
+      renderPitchSVG(data);
+
+      // メジャー目盛り表の再描画
+      renderTapeList(data);
+
+      // 手順書の再描画
+      renderStepsList(data);
+
+      // プリセットバッジ更新
+      checkActivePreset();
+
+      // ローカルストレージ保存
+      saveSettings();
+    }
+
+    /* プリセット一致チェック */
+    function checkActivePreset() {
+      let matched = 'カスタム';
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        const pKey = btn.dataset.preset;
+        const p = PRESETS[pKey];
+        if (p && p.length === state.length && p.width === state.width && p.goalWidth === state.goalWidth) {
+          matched = p.name.split(' ')[0];
+          btn.classList.add('border-pitch-600', 'bg-pitch-50');
+        } else {
+          btn.classList.remove('border-pitch-600', 'bg-pitch-50');
+        }
+      });
+      document.getElementById('activePresetBadge').textContent = matched;
+    }
+
+    /* ==========================================================================
+       SVG ピッチ図描画
+       ========================================================================== */
+    function renderPitchSVG(data) {
+      const container = document.getElementById('svgContainer');
+      const isLandscape = (state.svgOrientation === 'landscape');
+
+      const pitchL = data.length; // 縦
+      const pitchW = data.width;  // 横
+
+      const margin = 5; // 余白 (m)
+      const svgW = isLandscape ? (pitchL + margin * 2) : (pitchW + margin * 2);
+      const svgH = isLandscape ? (pitchW + margin * 2) : (pitchL + margin * 2);
+
+      const ox = margin;
+      const oy = margin;
+
+      // 芝生のストライプ本数
+      const stripeCount = 10;
+      let stripesSvg = '';
+      if (isLandscape) {
+        const stripeW = pitchL / stripeCount;
+        for (let i = 0; i < stripeCount; i++) {
+          const bg = i % 2 === 0 ? '#15803d' : '#166534';
+          stripesSvg += `<rect x="${ox + i * stripeW}" y="${oy}" width="${stripeW}" height="${pitchW}" fill="${bg}" opacity="0.45" />`;
+        }
+      } else {
+        const stripeH = pitchL / stripeCount;
+        for (let i = 0; i < stripeCount; i++) {
+          const bg = i % 2 === 0 ? '#15803d' : '#166534';
+          stripesSvg += `<rect x="${ox}" y="${oy + i * stripeH}" width="${pitchW}" height="${stripeH}" fill="${bg}" opacity="0.45" />`;
+        }
+      }
+
+      let pitchElements = '';
+
+      if (isLandscape) {
+        // 横向き描画: 左ゴール ↔ 右ゴール
+        const midX = ox + pitchL / 2;
+        const midY = oy + pitchW / 2;
+
+        const paTop = midY - data.paWidth / 2;
+        const gaTop = midY - data.gaWidth / 2;
+        const goalTop = midY - data.goalWidth / 2;
+
+        pitchElements = `
+          <!-- 外枠 (タッチライン・ゴールライン) -->
+          <rect x="${ox}" y="${oy}" width="${pitchL}" height="${pitchW}" fill="none" stroke="#ffffff" stroke-width="0.35" />
+
+          <!-- 対角線（点線ガイド） -->
+          <line x1="${ox}" y1="${oy}" x2="${ox + pitchL}" y2="${oy + pitchW}" stroke="#60a5fa" stroke-width="0.25" stroke-dasharray="0.8,0.8" opacity="0.75" />
+
+          <!-- センターライン -->
+          <line x1="${midX}" y1="${oy}" x2="${midX}" y2="${oy + pitchW}" stroke="#ffffff" stroke-width="0.3" />
+
+          <!-- センターサークル & マーク -->
+          <circle cx="${midX}" cy="${midY}" r="${data.circleRadius}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <circle cx="${midX}" cy="${midY}" r="0.4" fill="#ffffff" />
+
+          <!-- 左側 ペナルティエリア & アーク & PK -->
+          <rect x="${ox}" y="${paTop}" width="${data.paDepth}" height="${data.paWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" class="cursor-pointer hover:stroke-amber-300" onclick="showPitchPart('PA（ペナルティエリア）', '${data.paDepth}m × ${data.paWidth}m', 'GKが手を使えるエリア。深さ: ${data.paDepth}m, 横幅: ${data.paWidth}m')" />
+          <rect x="${ox}" y="${gaTop}" width="${data.gaDepth}" height="${data.gaWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" class="cursor-pointer hover:stroke-amber-300" onclick="showPitchPart('GA（ゴールエリア）', '${data.gaDepth}m × ${data.gaWidth}m', 'ゴールキックを行うエリア。深さ: ${data.gaDepth}m, 横幅: ${data.gaWidth}m')" />
+          <circle cx="${ox + data.pkDist}" cy="${midY}" r="0.35" fill="#ffffff" />
+          <path d="M ${ox + data.paDepth} ${midY - Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} A ${data.penaltyArcRadius} ${data.penaltyArcRadius} 0 0 1 ${ox + data.paDepth} ${midY + Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <rect x="${ox - 1.2}" y="${goalTop}" width="1.2" height="${data.goalWidth}" fill="#ffffff" fill-opacity="0.3" stroke="#facc15" stroke-width="0.4" />
+
+          <!-- 右側 ペナルティエリア & アーク & PK -->
+          <rect x="${ox + pitchL - data.paDepth}" y="${paTop}" width="${data.paDepth}" height="${data.paWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <rect x="${ox + pitchL - data.gaDepth}" y="${gaTop}" width="${data.gaDepth}" height="${data.gaWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <circle cx="${ox + pitchL - data.pkDist}" cy="${midY}" r="0.35" fill="#ffffff" />
+          <path d="M ${ox + pitchL - data.paDepth} ${midY - Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} A ${data.penaltyArcRadius} ${data.penaltyArcRadius} 0 0 0 ${ox + pitchL - data.paDepth} ${midY + Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <rect x="${ox + pitchL}" y="${goalTop}" width="1.2" height="${data.goalWidth}" fill="#ffffff" fill-opacity="0.3" stroke="#facc15" stroke-width="0.4" />
+
+          <!-- コーナーアーク (四隅) -->
+          <path d="M ${ox} ${oy + data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 0 ${ox + data.cornerArcRadius} ${oy}" fill="none" stroke="#ffffff" stroke-width="0.25" />
+          <path d="M ${ox} ${oy + pitchW - data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 1 ${ox + data.cornerArcRadius} ${oy + pitchW}" fill="none" stroke="#ffffff" stroke-width="0.25" />
+          <path d="M ${ox + pitchL} ${oy + data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 1 ${ox + pitchL - data.cornerArcRadius} ${oy}" fill="none" stroke="#ffffff" stroke-width="0.25" />
+          <path d="M ${ox + pitchL} ${oy + pitchW - data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 0 ${ox + pitchL - data.cornerArcRadius} ${oy + pitchW}" fill="none" stroke="#ffffff" stroke-width="0.25" />
+
+          <!-- 直角出しガイド三角形 (左上コーナー) -->
+          <polygon points="${ox},${oy} ${ox + data.pyth.b},${oy} ${ox},${oy + data.pyth.a}" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.5,0.5" />
+          <text x="${ox + data.pyth.b / 2}" y="${oy - 0.8}" fill="#38bdf8" font-size="1.2" font-weight="bold" text-anchor="middle">${data.pyth.b}m(4)</text>
+          <text x="${ox - 0.8}" y="${oy + data.pyth.a / 2}" fill="#38bdf8" font-size="1.2" font-weight="bold" text-anchor="end">${data.pyth.a}m(3)</text>
+          <text x="${ox + data.pyth.b / 2 + 0.5}" y="${oy + data.pyth.a / 2 + 0.5}" fill="#facc15" font-size="1.2" font-weight="bold">${data.pyth.c}m(5)</text>
+
+          <!-- 寸法ラベルオーバーレイ -->
+          <text x="${midX}" y="${oy - 1.8}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">縦: ${pitchL.toFixed(1)}m</text>
+          <text x="${ox - 2.2}" y="${midY}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 2.2} ${midY})">横: ${pitchW.toFixed(1)}m</text>
+        `;
+      } else {
+        // 縦向き描画: 上ゴール ↔ 下ゴール
+        const midX = ox + pitchW / 2;
+        const midY = oy + pitchL / 2;
+
+        const paLeft = midX - data.paWidth / 2;
+        const gaLeft = midX - data.gaWidth / 2;
+        const goalLeft = midX - data.goalWidth / 2;
+
+        pitchElements = `
+          <!-- 外枠 -->
+          <rect x="${ox}" y="${oy}" width="${pitchW}" height="${pitchL}" fill="none" stroke="#ffffff" stroke-width="0.35" />
+
+          <!-- 対角線 -->
+          <line x1="${ox}" y1="${oy}" x2="${ox + pitchW}" y2="${oy + pitchL}" stroke="#60a5fa" stroke-width="0.25" stroke-dasharray="0.8,0.8" opacity="0.75" />
+
+          <!-- センターライン -->
+          <line x1="${ox}" y1="${midY}" x2="${ox + pitchW}" y2="${midY}" stroke="#ffffff" stroke-width="0.3" />
+
+          <!-- センターサークル -->
+          <circle cx="${midX}" cy="${midY}" r="${data.circleRadius}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <circle cx="${midX}" cy="${midY}" r="0.4" fill="#ffffff" />
+
+          <!-- 上側 エリア -->
+          <rect x="${paLeft}" y="${oy}" width="${data.paWidth}" height="${data.paDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <rect x="${gaLeft}" y="${oy}" width="${data.gaWidth}" height="${data.gaDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <circle cx="${midX}" cy="${oy + data.pkDist}" r="0.35" fill="#ffffff" />
+          <path d="M ${midX - Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} ${oy + data.paDepth} A ${data.penaltyArcRadius} ${data.penaltyArcRadius} 0 0 0 ${midX + Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} ${oy + data.paDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <rect x="${goalLeft}" y="${oy - 1.2}" width="${data.goalWidth}" height="1.2" fill="#ffffff" fill-opacity="0.3" stroke="#facc15" stroke-width="0.4" />
+
+          <!-- 下側 エリア -->
+          <rect x="${paLeft}" y="${oy + pitchL - data.paDepth}" width="${data.paWidth}" height="${data.paDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <rect x="${gaLeft}" y="${oy + pitchL - data.gaDepth}" width="${data.gaWidth}" height="${data.gaDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <circle cx="${midX}" cy="${oy + pitchL - data.pkDist}" r="0.35" fill="#ffffff" />
+          <path d="M ${midX - Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} ${oy + pitchL - data.paDepth} A ${data.penaltyArcRadius} ${data.penaltyArcRadius} 0 0 1 ${midX + Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} ${oy + pitchL - data.paDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
+          <rect x="${goalLeft}" y="${oy + pitchL}" width="${data.goalWidth}" height="1.2" fill="#ffffff" fill-opacity="0.3" stroke="#facc15" stroke-width="0.4" />
+
+          <!-- 四隅コーナーアーク -->
+          <path d="M ${ox} ${oy + data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 0 ${ox + data.cornerArcRadius} ${oy}" fill="none" stroke="#ffffff" stroke-width="0.25" />
+          <path d="M ${ox + pitchW} ${oy + data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 1 ${ox + pitchW - data.cornerArcRadius} ${oy}" fill="none" stroke="#ffffff" stroke-width="0.25" />
+          <path d="M ${ox} ${oy + pitchL - data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 1 ${ox + data.cornerArcRadius} ${oy + pitchL}" fill="none" stroke="#ffffff" stroke-width="0.25" />
+          <path d="M ${ox + pitchW} ${oy + pitchL - data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 0 ${ox + pitchW - data.cornerArcRadius} ${oy + pitchL}" fill="none" stroke="#ffffff" stroke-width="0.25" />
+
+          <!-- 直角出しガイド三角形 (左上) -->
+          <polygon points="${ox},${oy} ${ox + data.pyth.a},${oy} ${ox},${oy + data.pyth.b}" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.5,0.5" />
+          <text x="${ox + data.pyth.a / 2}" y="${oy - 0.8}" fill="#38bdf8" font-size="1.2" font-weight="bold" text-anchor="middle">${data.pyth.a}m(3)</text>
+          <text x="${ox - 0.8}" y="${oy + data.pyth.b / 2}" fill="#38bdf8" font-size="1.2" font-weight="bold" text-anchor="end">${data.pyth.b}m(4)</text>
+
+          <!-- 寸法ラベル -->
+          <text x="${midX}" y="${oy - 1.8}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">横: ${pitchW.toFixed(1)}m</text>
+          <text x="${ox - 1.8}" y="${midY}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 1.8} ${midY})">縦: ${pitchL.toFixed(1)}m</text>
+        `;
+      }
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${svgW} ${svgH}" class="w-full h-auto max-h-[380px] drop-shadow-lg select-none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 背景芝生ベース -->
+          <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="#14532d" />
+          ${stripesSvg}
+          ${pitchElements}
+        </svg>
+      `;
+    }
+
+    /* クリックによる詳細解説 */
+    function showPitchPart(title, value, desc) {
+      const card = document.getElementById('pitchInspectCard');
+      document.getElementById('inspectTitle').textContent = title;
+      document.getElementById('inspectValue').textContent = value;
+      document.getElementById('inspectDesc').textContent = desc;
+      card.classList.remove('hidden');
+    }
+
+    /* ==========================================================================
+       メジャー目盛り表 (片道累計) 描画
+       ========================================================================== */
+    function calculateTapeMarks(data) {
+      if (state.tapeTarget === 'goal') {
+        const w = data.width;
+        const paOff = (w - data.paWidth) / 2;
+        const gaOff = (w - data.gaWidth) / 2;
+        const gOff = (w - data.goalWidth) / 2;
+        const center = w / 2;
+
+        let marks = [
+          { key: 'g_0', name: 'コーナー（左・測定開始）', dist: 0.0, badge: '起点', color: 'slate' },
+          { key: 'g_pa_l', name: 'ペナルティエリア (PA) 端', dist: paOff, badge: 'PA端', color: 'blue' },
+          { key: 'g_ga_l', name: 'ゴールエリア (GA) 端', dist: gaOff, badge: 'GA端', color: 'indigo' },
+          { key: 'g_post_l', name: 'ゴールポスト (左)', dist: gOff, badge: 'ポスト', color: 'amber' },
+          { key: 'g_center', name: 'ゴール中央（ピッチ中心）', dist: center, badge: '中央', color: 'emerald' },
+          { key: 'g_post_r', name: 'ゴールポスト (右)', dist: w - gOff, badge: 'ポスト', color: 'amber' },
+          { key: 'g_ga_r', name: 'ゴールエリア (GA) 端', dist: w - gaOff, badge: 'GA端', color: 'indigo' },
+          { key: 'g_pa_r', name: 'ペナルティエリア (PA) 端', dist: w - paOff, badge: 'PA端', color: 'blue' },
+          { key: 'g_end', name: '反対側コーナー（測定完了）', dist: w, badge: '終点', color: 'slate' }
+        ];
+
+        if (state.tapeReverse) {
+          marks = marks.map(m => ({
+            ...m,
+            dist: Number((w - m.dist).toFixed(2))
+          })).sort((a, b) => a.dist - b.dist);
+        }
+
+        return marks;
+      } else {
+        const len = data.length;
+        const pythB = data.pyth.b; // タッチ側 4k
+        const center = len / 2;
+
+        let marks = [
+          { key: 't_0', name: 'コーナー（起点）', dist: 0.0, badge: '起点', color: 'slate' },
+          { key: 't_pyth1', name: `直角出し基準点 (${pythB}m地点)`, dist: pythB, badge: '直角(4)', color: 'sky' },
+          { key: 't_center', name: 'センターライン（中央地点）', dist: center, badge: '中央', color: 'emerald' },
+          { key: 't_pyth2', name: `対向直角出し基準点`, dist: len - pythB, badge: '直角(4)', color: 'sky' },
+          { key: 't_end', name: '反対側コーナー（終点）', dist: len, badge: '終点', color: 'slate' }
+        ];
+
+        if (state.tapeReverse) {
+          marks = marks.map(m => ({
+            ...m,
+            dist: Number((len - m.dist).toFixed(2))
+          })).sort((a, b) => a.dist - b.dist);
+        }
+
+        return marks;
+      }
+    }
+
+    function renderTapeList(data) {
+      const listContainer = document.getElementById('tapeMarksList');
+      const gaugeContainer = document.getElementById('tapeVisualGauge');
+      const marks = calculateTapeMarks(data);
+      const totalLen = (state.tapeTarget === 'goal' ? data.width : data.length);
+
+      document.getElementById('tapeTotalLengthDesc').textContent = `測定全長: ${totalLen.toFixed(1)}m (${state.tapeTarget === 'goal' ? 'ゴールライン' : 'タッチライン'})`;
+      document.getElementById('tapeDirLabel').textContent = state.tapeReverse ? '右 → 左 (逆順)' : '左 → 右 (順順)';
+
+      // 視覚的ゲージバーの描画
+      let gaugeSvg = `
+        <svg viewBox="0 0 100 18" class="w-full h-8" preserveAspectRatio="none">
+          <rect x="2" y="7" width="96" height="4" rx="2" fill="#cbd5e1" />
+      `;
+      marks.forEach(m => {
+        const pct = 2 + (m.dist / totalLen) * 96;
+        const isCenter = m.badge === '中央';
+        const isGoal = m.badge === 'ポスト';
+        const col = isCenter ? '#10b981' : (isGoal ? '#f59e0b' : '#3b82f6');
+        gaugeSvg += `
+          <line x1="${pct}" y1="3" x2="${pct}" y2="15" stroke="${col}" stroke-width="1.2" />
+          <circle cx="${pct}" cy="9" r="2.2" fill="${col}" />
+        `;
+      });
+      gaugeSvg += `</svg>`;
+      gaugeContainer.innerHTML = gaugeSvg;
+
+      let checkedCount = 0;
+      let html = '';
+
+      marks.forEach((item, index) => {
+        const isChecked = !!state.tapeChecks[item.key];
+        if (isChecked) checkedCount++;
+
+        const prevDist = index === 0 ? 0 : marks[index - 1].dist;
+        const diff = Number((item.dist - prevDist).toFixed(2));
+
+        const badgeColorMap = {
+          slate: 'bg-slate-100 text-slate-700',
+          blue: 'bg-blue-100 text-blue-800',
+          indigo: 'bg-indigo-100 text-indigo-800',
+          amber: 'bg-amber-100 text-amber-800',
+          emerald: 'bg-emerald-100 text-emerald-800',
+          sky: 'bg-sky-100 text-sky-800'
+        };
+        const badgeCls = badgeColorMap[item.color] || 'bg-slate-100 text-slate-800';
+
+        html += `
+          <div class="sun-card flex items-center justify-between p-2.5 rounded-xl border ${isChecked ? 'bg-emerald-50/70 border-emerald-300' : 'bg-white border-slate-200'} shadow-sm transition">
+            <!-- チェックボックス + 名称 -->
+            <label class="flex items-center space-x-2.5 flex-1 cursor-pointer select-none">
+              <input type="checkbox" data-mark-key="${item.key}" ${isChecked ? 'checked' : ''} onchange="toggleTapeCheck('${item.key}')" class="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+              <div>
+                <div class="flex items-center space-x-1.5">
+                  <span class="text-[10px] font-extrabold px-1.5 py-0.2 rounded ${badgeCls}">${item.badge}</span>
+                  <span class="text-xs font-bold ${isChecked ? 'line-through text-slate-400' : 'text-slate-800'}">${item.name}</span>
+                </div>
+                ${index > 0 ? `<p class="text-[10px] text-slate-400 mt-0.5 font-medium">直前から ＋${diff.toFixed(1)}m</p>` : `<p class="text-[10px] text-slate-400 mt-0.5">メジャー先端 0.0m</p>`}
+              </div>
+            </label>
+
+            <!-- メジャー目盛り表示（特大） -->
+            <div class="text-right pl-2">
+              <span class="text-xl font-black ${isChecked ? 'text-emerald-700' : 'text-slate-900'} tracking-tight">${item.dist.toFixed(1)}</span>
+              <span class="text-xs font-bold text-slate-500">m</span>
+            </div>
+          </div>
+        `;
+      });
+
+      listContainer.innerHTML = html;
+      document.getElementById('checkedCountDisplay').textContent = `${checkedCount} / ${marks.length} 完了`;
+    }
+
+    function toggleTapeCheck(key) {
+      state.tapeChecks[key] = !state.tapeChecks[key];
+      updateAllUI();
+    }
+
+    /* ==========================================================================
+       動的設営手順書 (STEP 1〜6) 描画
+       ========================================================================== */
+    function renderStepsList(data) {
+      const container = document.getElementById('stepCardsContainer');
+      const pyth = data.pyth;
+
+      const steps = [
+        {
+          num: 1,
+          title: "片側タッチラインの基準出し",
+          desc: `まず、基準となる長辺（タッチライン）を真っ直ぐ1本張ります。`,
+          key: "step_1",
+          details: [
+            `コートの片側端に「コーナーペグ A」を打ち、メジャーを伸ばして <strong>${data.length.toFixed(1)}m</strong> の位置に「コーナーペグ B」を打ちます。`,
+            `メジャーの <strong>${(data.length / 2).toFixed(1)}m</strong> 地点に「センターペグ」を打ちます。`,
+            `コーナーAから <strong>${pyth.b.toFixed(1)}m</strong> の地点に「直角出し用ペグ P」を打ちます（STEP 2で使用）。`
+          ],
+          svg: `
+            <svg viewBox="0 0 100 24" class="w-full h-12 bg-pitch-900 rounded-lg p-1">
+              <line x1="10" y1="12" x2="90" y2="12" stroke="#22c55e" stroke-width="2" />
+              <circle cx="10" cy="12" r="3" fill="#ef4444" /><text x="10" y="22" fill="#fff" font-size="6" text-anchor="middle">A(0m)</text>
+              <circle cx="${10 + 80 * (pyth.b / data.length)}" cy="12" r="2.5" fill="#38bdf8" /><text x="${10 + 80 * (pyth.b / data.length)}" y="7" fill="#38bdf8" font-size="5" text-anchor="middle">P(${pyth.b}m)</text>
+              <circle cx="50" cy="12" r="2.5" fill="#facc15" /><text x="50" y="22" fill="#fff" font-size="5" text-anchor="middle">中央(${(data.length/2).toFixed(1)}m)</text>
+              <circle cx="90" cy="12" r="3" fill="#ef4444" /><text x="90" y="22" fill="#fff" font-size="6" text-anchor="middle">B(${data.length}m)</text>
+            </svg>
+          `
+        },
+        {
+          num: 2,
+          title: `3:4:5の定理による直角出し (${pyth.a}-${pyth.b}-${pyth.c}m)`,
+          desc: `コーナーAからゴールライン方向の直角（90度）を正確に出します。`,
+          key: "step_2",
+          details: [
+            `2本のメジャーを用意します（または1本を回します）。`,
+            `1本目: コーナーAからゴールライン方向へ <strong>${pyth.a.toFixed(1)}m</strong> 伸ばします。`,
+            `2本目: STEP1で打ったペグP (${pyth.b.toFixed(1)}m地点) から <strong>${pyth.c.toFixed(1)}m</strong> 伸ばします。`,
+            `2本のメジャーの先端（${pyth.a.toFixed(1)}m と ${pyth.c.toFixed(1)}m）をピンと引っ張って交差させた点が「完全な直角方向の基準点 Q」になります！`
+          ],
+          svg: `
+            <svg viewBox="0 0 100 40" class="w-full h-20 bg-pitch-900 rounded-lg p-1">
+              <line x1="15" y1="32" x2="75" y2="32" stroke="#ffffff" stroke-width="1.5" />
+              <line x1="15" y1="32" x2="15" y2="10" stroke="#38bdf8" stroke-width="2" />
+              <line x1="55" y1="32" x2="15" y2="10" stroke="#facc15" stroke-width="2" stroke-dasharray="2,2" />
+              <circle cx="15" cy="32" r="2.5" fill="#ef4444" /><text x="10" y="34" fill="#fff" font-size="5">A(直角)</text>
+              <circle cx="55" cy="32" r="2" fill="#38bdf8" /><text x="55" y="38" fill="#38bdf8" font-size="5" text-anchor="middle">P(${pyth.b}m)</text>
+              <circle cx="15" cy="10" r="2.5" fill="#22c55e" /><text x="18" y="9" fill="#22c55e" font-size="5" font-weight="bold">Q交点(${pyth.c}m)</text>
+              <text x="7" y="22" fill="#38bdf8" font-size="5">${pyth.a}m</text>
+            </svg>
+          `
+        },
+        {
+          num: 3,
+          title: "片側ゴールラインのマーキング",
+          desc: `直角方向Qを通るようにゴールライン（${data.width.toFixed(1)}m）を引っ張ります。`,
+          key: "step_3",
+          details: [
+            `コーナーAを0mとして、点Qを通る直線上にメジャーを <strong>${data.width.toFixed(1)}m</strong> まっすぐ伸ばし、コーナーCを決定します。`,
+            `メジャーを固定したまま「メジャー目盛り表」に沿って一度にペグを打ちます:`,
+            `・PA端: <strong>${((data.width - data.paWidth)/2).toFixed(1)}m</strong> / <strong>${(data.width - (data.width - data.paWidth)/2).toFixed(1)}m</strong>`,
+            `・GA端: <strong>${((data.width - data.gaWidth)/2).toFixed(1)}m</strong> / <strong>${(data.width - (data.width - data.gaWidth)/2).toFixed(1)}m</strong>`,
+            `・ゴールポスト: <strong>${((data.width - data.goalWidth)/2).toFixed(1)}m</strong> / <strong>${(data.width - (data.width - data.goalWidth)/2).toFixed(1)}m</strong>`,
+            `・中央: <strong>${(data.width / 2).toFixed(1)}m</strong> (ゴールポストを中央に設置)`
+          ],
+          svg: `
+            <svg viewBox="0 0 100 24" class="w-full h-12 bg-pitch-900 rounded-lg p-1">
+              <line x1="10" y1="12" x2="90" y2="12" stroke="#22c55e" stroke-width="2" />
+              <circle cx="10" cy="12" r="2.5" fill="#ef4444" /><text x="10" y="22" fill="#fff" font-size="5" text-anchor="middle">A(0m)</text>
+              <rect x="25" y="10" width="50" height="4" fill="none" stroke="#38bdf8" stroke-width="1" />
+              <circle cx="50" cy="12" r="2" fill="#facc15" /><text x="50" y="8" fill="#facc15" font-size="5" text-anchor="middle">ゴール中央(${(data.width/2).toFixed(1)}m)</text>
+              <circle cx="90" cy="12" r="2.5" fill="#ef4444" /><text x="90" y="22" fill="#fff" font-size="5" text-anchor="middle">C(${data.width}m)</text>
+            </svg>
+          `
+        },
+        {
+          num: 4,
+          title: "反対側タッチライン・外枠（四隅）の完成",
+          desc: `対角線の長さ（${data.diagonal.toFixed(2)}m）で長方形の歪みをゼロにします。`,
+          key: "step_4",
+          details: [
+            `コーナーBからコーナーCまでの対角線が <strong>${data.diagonal.toFixed(2)}m</strong> になっているか確認します。`,
+            `コーナーCからタッチライン方向へ <strong>${data.length.toFixed(1)}m</strong>、コーナーBからゴールライン方向へ <strong>${data.width.toFixed(1)}m</strong> の交点に「最後の四隅ペグ D」を打ちます。`,
+            `AからDへの対角線も <strong>${data.diagonal.toFixed(2)}m</strong> であれば、完璧な長方形（歪みなし）が完成です！`
+          ],
+          svg: `
+            <svg viewBox="0 0 100 45" class="w-full h-20 bg-pitch-900 rounded-lg p-1">
+              <rect x="15" y="8" width="70" height="30" fill="none" stroke="#22c55e" stroke-width="1.5" />
+              <line x1="15" y1="8" x2="85" y2="38" stroke="#60a5fa" stroke-width="1" stroke-dasharray="2,2" />
+              <line x1="15" y1="38" x2="85" y2="8" stroke="#60a5fa" stroke-width="1" stroke-dasharray="2,2" />
+              <text x="50" y="25" fill="#93c5fd" font-size="6" font-weight="bold" text-anchor="middle">対角線: ${data.diagonal.toFixed(2)}m</text>
+              <text x="12" y="7" fill="#fff" font-size="5">A</text>
+              <text x="88" y="7" fill="#fff" font-size="5">B</text>
+              <text x="12" y="42" fill="#fff" font-size="5">C</text>
+              <text x="88" y="42" fill="#fff" font-size="5">D</text>
+            </svg>
+          `
+        },
+        {
+          num: 5,
+          title: "センターライン・サークル・コーナーアーク",
+          desc: `ピッチを二分するセンターラインと、キックオフの円を描きます。`,
+          key: "step_5",
+          details: [
+            `左右のタッチライン ${(data.length / 2).toFixed(1)}m のペグ同士を結んで「センターライン」を引きます。`,
+            `センターラインの中央（${(data.width / 2).toFixed(1)}m）に「センターマーク」を打ちます。`,
+            `センターマークにペグを固定し、メジャーまたはロープを <strong>${data.circleRadius.toFixed(1)}m</strong> 伸ばして360度回転させて「センターサークル」を描きます。`,
+            `ピッチ四隅のコーナーペグから半径 <strong>1.0m</strong> の円弧（コーナーアーク）を引きます。`
+          ],
+          svg: `
+            <svg viewBox="0 0 100 35" class="w-full h-16 bg-pitch-900 rounded-lg p-1">
+              <rect x="15" y="5" width="70" height="25" fill="none" stroke="#ffffff" stroke-width="1" />
+              <line x1="50" y1="5" x2="50" y2="30" stroke="#ffffff" stroke-width="1.5" />
+              <circle cx="50" cy="17.5" r="7" fill="none" stroke="#22c55e" stroke-width="1.5" />
+              <circle cx="50" cy="17.5" r="1.5" fill="#facc15" />
+              <text x="50" y="34" fill="#22c55e" font-size="5" font-weight="bold" text-anchor="middle">半径 ${data.circleRadius.toFixed(1)}m</text>
+            </svg>
+          `
+        },
+        {
+          num: 6,
+          title: "エリアライン・ペナルティアークの完成",
+          desc: `ペナルティエリア、ゴールエリアのボックスとPKマークを作ります。`,
+          key: "step_6",
+          details: [
+            `ゴールラインのGA印からピッチ内へ直角に <strong>${data.gaDepth.toFixed(1)}m</strong> 伸ばし、横幅 <strong>${data.gaWidth.toFixed(1)}m</strong> を結んで「ゴールエリア」を完成。`,
+            `ゴールラインのPA印からピッチ内へ直角に <strong>${data.paDepth.toFixed(1)}m</strong> 伸ばし、横幅 <strong>${data.paWidth.toFixed(1)}m</strong> を結んで「ペナルティエリア」を完成。`,
+            `ゴール中央からピッチ内へ <strong>${data.pkDist.toFixed(1)}m</strong> の地点に「ペナルティマーク (PK)」を打ちます。`,
+            `PKマークを中心にして半径 <strong>${data.penaltyArcRadius.toFixed(1)}m</strong> でPAの外側にペナルティアークを描いて完成です！`
+          ],
+          svg: `
+            <svg viewBox="0 0 100 40" class="w-full h-20 bg-pitch-900 rounded-lg p-1">
+              <line x1="10" y1="5" x2="90" y2="5" stroke="#ffffff" stroke-width="1" />
+              <rect x="25" y="5" width="50" height="20" fill="none" stroke="#22c55e" stroke-width="1.5" />
+              <rect x="35" y="5" width="30" height="10" fill="none" stroke="#38bdf8" stroke-width="1.2" />
+              <circle cx="50" cy="18" r="1.5" fill="#facc15" />
+              <path d="M 40 25 A 7 7 0 0 0 60 25" fill="none" stroke="#facc15" stroke-width="1.2" />
+              <text x="50" y="38" fill="#facc15" font-size="5" text-anchor="middle">PKマーク (${data.pkDist.toFixed(1)}m) / アーク半径 ${data.penaltyArcRadius.toFixed(1)}m</text>
+            </svg>
+          `
+        }
+      ];
+
+      let completedSteps = 0;
+      let html = '';
+
+      steps.forEach(step => {
+        const isDone = !!state.stepChecks[step.key];
+        if (isDone) completedSteps++;
+
+        html += `
+          <div class="sun-card bg-white rounded-xl p-3.5 border ${isDone ? 'border-emerald-400 bg-emerald-50/40' : 'border-slate-200'} shadow-sm transition space-y-2.5">
+            <!-- タイトル行 & チェックボックス -->
+            <div class="flex items-start justify-between">
+              <label class="flex items-start space-x-2.5 cursor-pointer flex-1 select-none">
+                <input type="checkbox" data-step-key="${step.key}" ${isDone ? 'checked' : ''} onchange="toggleStepCheck('${step.key}')" class="mt-0.5 w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+                <div>
+                  <span class="inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-pitch-100 text-pitch-800">
+                    STEP ${step.num}
+                  </span>
+                  <h3 class="text-xs font-black text-slate-900 mt-0.5 leading-snug">${step.title}</h3>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${step.desc}</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- ミニ図解SVG -->
+            <div class="rounded-lg overflow-hidden border border-slate-800/20 shadow-inner">
+              ${step.svg}
+            </div>
+
+            <!-- 具体的な手順箇条書き -->
+            <ul class="text-[11px] text-slate-700 space-y-1 bg-slate-50 p-2 rounded-lg border border-slate-200 leading-relaxed">
+              ${step.details.map(d => `<li class="flex items-start"><span class="text-pitch-600 mr-1.5 font-bold">・</span><span>${d}</span></li>`).join('')}
+            </ul>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+
+      const pct = Math.round((completedSteps / steps.length) * 100);
+      document.getElementById('stepsProgressText').textContent = `${completedSteps} / ${steps.length} 完了 (${pct}%)`;
+      document.getElementById('stepsProgressBar').style.width = `${pct}%`;
+
+      const banner = document.getElementById('allDoneBanner');
+      if (completedSteps === steps.length) {
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    function toggleStepCheck(key) {
+      state.stepChecks[key] = !state.stepChecks[key];
+      updateAllUI();
+    }
+
+    /* ==========================================================================
+       操作ハンドラ & イベントリスナー
+       ========================================================================== */
+    function adjustValue(field, delta) {
+      if (field === 'length') {
+        state.length = Math.min(Math.max(Number((state.length + delta).toFixed(1)), 30), 75);
+      } else if (field === 'width') {
+        state.width = Math.min(Math.max(Number((state.width + delta).toFixed(1)), 20), 55);
+      }
+      updateAllUI();
+    }
+
+    // スライダー入力
+    document.getElementById('lengthRangeInput').addEventListener('input', (e) => {
+      state.length = parseFloat(e.target.value);
+      updateAllUI();
+    });
+    document.getElementById('widthRangeInput').addEventListener('input', (e) => {
+      state.width = parseFloat(e.target.value);
+      updateAllUI();
+    });
+
+    // 数値ボックス直接入力
+    document.getElementById('lengthNumberInput').addEventListener('change', (e) => {
+      let val = parseFloat(e.target.value);
+      if (isNaN(val)) val = 50.0;
+      state.length = Math.min(Math.max(val, 30), 75);
+      updateAllUI();
+    });
+    document.getElementById('widthNumberInput').addEventListener('change', (e) => {
+      let val = parseFloat(e.target.value);
+      if (isNaN(val)) val = 32.0;
+      state.width = Math.min(Math.max(val, 20), 55);
+      updateAllUI();
+    });
+
+    // プルダウン変更
+    document.getElementById('goalWidthSelect').addEventListener('change', (e) => {
+      state.goalWidth = parseFloat(e.target.value);
+      updateAllUI();
+    });
+    document.getElementById('roundStepSelect').addEventListener('change', (e) => {
+      state.roundStep = parseFloat(e.target.value);
+      updateAllUI();
+    });
+
+    // プリセットボタンクリック
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pKey = btn.dataset.preset;
+        const p = PRESETS[pKey];
+        if (p) {
+          state.length = p.length;
+          state.width = p.width;
+          state.goalWidth = p.goalWidth;
+          document.getElementById('goalWidthSelect').value = p.goalWidth.toFixed(1);
+          showToast(`プリセット「${p.name}」を適用しました`);
+          updateAllUI();
+        }
+      });
+    });
+
+    // ピタゴラス数プルダウン初期化
+    function initPythSelect() {
+      const select = document.getElementById('pythSelect');
+      select.innerHTML = PYTHAGORAS_TABLE.map(p => `
+        <option value="${p.k}" ${p.k === state.pythMultiplier ? 'selected' : ''}>${p.label}</option>
+      `).join('');
+
+      select.addEventListener('change', (e) => {
+        state.pythMultiplier = parseInt(e.target.value, 10);
+        updateAllUI();
+      });
+    }
+
+    // タブ切替
+    function switchTab(tabName) {
+      state.currentTab = tabName;
+      const tabs = [
+        { name: 'pitch', btn: 'tabBtnPitch', content: 'tabContentPitch' },
+        { name: 'tape', btn: 'tabBtnTape', content: 'tabContentTape' },
+        { name: 'steps', btn: 'tabBtnSteps', content: 'tabContentSteps' }
+      ];
+
+      tabs.forEach(t => {
+        const btn = document.getElementById(t.btn);
+        const content = document.getElementById(t.content);
+        if (t.name === tabName) {
+          btn.classList.add('bg-white', 'text-pitch-800', 'shadow-sm');
+          btn.classList.remove('text-slate-600');
+          content.classList.remove('hidden');
+        } else {
+          btn.classList.remove('bg-white', 'text-pitch-800', 'shadow-sm');
+          btn.classList.add('text-slate-600');
+          content.classList.add('hidden');
+        }
+      });
+    }
+
+    document.getElementById('tabBtnPitch').addEventListener('click', () => switchTab('pitch'));
+    document.getElementById('tabBtnTape').addEventListener('click', () => switchTab('tape'));
+    document.getElementById('tabBtnSteps').addEventListener('click', () => switchTab('steps'));
+
+    // SVG向き切替（縦/横）
+    document.getElementById('toggleOrientationBtn').addEventListener('click', () => {
+      state.svgOrientation = (state.svgOrientation === 'landscape' ? 'portrait' : 'landscape');
+      const isLand = (state.svgOrientation === 'landscape');
+      document.getElementById('orientationLabel').textContent = isLand ? '縦向き表示' : '横向き表示';
+      document.getElementById('orientationIcon').textContent = isLand ? '🔄' : '🔃';
+      updateAllUI();
+    });
+
+    // メジャー測定対象切替（ゴール/タッチ）
+    document.getElementById('tapeTargetGoal').addEventListener('click', () => {
+      state.tapeTarget = 'goal';
+      document.getElementById('tapeTargetGoal').classList.add('bg-white', 'text-pitch-800', 'shadow-sm');
+      document.getElementById('tapeTargetTouch').classList.remove('bg-white', 'text-pitch-800', 'shadow-sm');
+      updateAllUI();
+    });
+    document.getElementById('tapeTargetTouch').addEventListener('click', () => {
+      state.tapeTarget = 'touch';
+      document.getElementById('tapeTargetTouch').classList.add('bg-white', 'text-pitch-800', 'shadow-sm');
+      document.getElementById('tapeTargetGoal').classList.remove('bg-white', 'text-pitch-800', 'shadow-sm');
+      updateAllUI();
+    });
+
+    // メジャー測定方向反転
+    document.getElementById('toggleReverseTape').addEventListener('click', () => {
+      state.tapeReverse = !state.tapeReverse;
+      updateAllUI();
+    });
+
+    // チェックリセット
+    document.getElementById('resetTapeChecksBtn').addEventListener('click', () => {
+      if (confirm('メジャー目盛りのチェックをすべてリセットしますか？')) {
+        state.tapeChecks = {};
+        updateAllUI();
+      }
+    });
+    document.getElementById('resetStepsBtn').addEventListener('click', () => {
+      if (confirm('設営手順のチェックをすべてリセットしますか？')) {
+        state.stepChecks = {};
+        updateAllUI();
+      }
+    });
+
+    // 屋外直射日光モード切替
+    document.getElementById('toggleSunBtn').addEventListener('click', () => {
+      state.sunMode = !state.sunMode;
+      const body = document.body;
+      const sunIcon = document.getElementById('sunIcon');
+      const sunLabel = document.getElementById('sunLabel');
+
+      if (state.sunMode) {
+        body.classList.add('sun-mode');
+        sunIcon.textContent = '🌿';
+        sunLabel.textContent = '通常表示';
+        showToast('☀️ 直射日光ハイコントラストモードに切替えました');
+      } else {
+        body.classList.remove('sun-mode');
+        sunIcon.textContent = '☀️';
+        sunLabel.textContent = '直射日光';
+        showToast('🌿 通常モードに戻しました');
+      }
+      saveSettings();
+    });
+
+    // 画面スリープ防止 (Screen Wake Lock API)
+    document.getElementById('wakeLockBtn').addEventListener('click', async () => {
+      if ('wakeLock' in navigator) {
+        try {
+          if (!state.wakeLockActive) {
+            wakeLockSentinel = await navigator.wakeLock.request('screen');
+            state.wakeLockActive = true;
+            document.getElementById('wakeLockBtn').classList.add('bg-amber-400', 'text-black', 'border-amber-300');
+            document.getElementById('wakeLockText').textContent = '常時ON中';
+            showToast('💡 画面スリープを防止しています');
+
+            wakeLockSentinel.addEventListener('release', () => {
+              state.wakeLockActive = false;
+              document.getElementById('wakeLockBtn').classList.remove('bg-amber-400', 'text-black', 'border-amber-300');
+              document.getElementById('wakeLockText').textContent = '常時ON';
+            });
+          } else {
+            if (wakeLockSentinel) {
+              await wakeLockSentinel.release();
+              wakeLockSentinel = null;
+            }
+            state.wakeLockActive = false;
+            document.getElementById('wakeLockBtn').classList.remove('bg-amber-400', 'text-black', 'border-amber-300');
+            document.getElementById('wakeLockText').textContent = '常時ON';
+            showToast('画面スリープ防止を解除しました');
+          }
+        } catch (err) {
+          console.warn('Wake Lock error:', err);
+          showToast('このブラウザでは画面常時ONが制限されています');
+        }
+      } else {
+        showToast('お使いのブラウザは画面常時ON機能に非対応です');
+      }
+    });
+
+    // LINE共有用サマリーコピー
+    document.getElementById('shareSummaryBtn').addEventListener('click', () => {
+      const data = calculatePitchData();
+      const text = [
+        `【⚽ グランドメイキング 設営寸法メモ】`,
+        `■ コートサイズ: 縦${data.length.toFixed(1)}m × 横${data.width.toFixed(1)}m (ゴール幅${data.goalWidth.toFixed(1)}m)`,
+        `・対角線: ${data.diagonal.toFixed(2)}m (四隅の歪みチェック)`,
+        `・直角出し(3:4:5): ${data.pyth.a}m - ${data.pyth.b}m - ${data.pyth.c}m`,
+        `・PA(深さ×幅): ${data.paDepth.toFixed(1)}m × ${data.paWidth.toFixed(1)}m`,
+        `・GA(深さ×幅): ${data.gaDepth.toFixed(1)}m × ${data.gaWidth.toFixed(1)}m`,
+        `・PKマーク位置: ゴールから${data.pkDist.toFixed(1)}m`,
+        `・センターサークル半径: ${data.circleRadius.toFixed(1)}m`,
+        `----------------`,
+        `【📏 ゴールライン目盛り(コーナー0mから)】`,
+        `0.0m: コーナー`,
+        `${((data.width - data.paWidth)/2).toFixed(1)}m: PA左端`,
+        `${((data.width - data.gaWidth)/2).toFixed(1)}m: GA左端`,
+        `${((data.width - data.goalWidth)/2).toFixed(1)}m: ゴールポスト`,
+        `${(data.width/2).toFixed(1)}m: ゴール中央`,
+        `${(data.width - (data.width - data.goalWidth)/2).toFixed(1)}m: ゴールポスト`,
+        `${(data.width - (data.width - data.gaWidth)/2).toFixed(1)}m: GA右端`,
+        `${(data.width - (data.width - data.paWidth)/2).toFixed(1)}m: PA右端`,
+        `${data.width.toFixed(1)}m: 反対コーナー`,
+        `----------------`,
+        `Webツールで確認: ${window.location.href}`
+      ].join('\n');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('📋 LINE共有用の設営テキストをコピーしました！');
+        }).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    });
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showToast('📋 設営テキストをクリップボードにコピーしました！');
+    }
+
+    // トースト表示
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMessage').textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    /* ==========================================================================
+       ローカルストレージ保存 & 復元
+       ========================================================================== */
+    function saveSettings() {
+      try {
+        const saved = {
+          length: state.length,
+          width: state.width,
+          goalWidth: state.goalWidth,
+          roundStep: state.roundStep,
+          pythMultiplier: state.pythMultiplier,
+          sunMode: state.sunMode,
+          tapeChecks: state.tapeChecks,
+          stepChecks: state.stepChecks
+        };
+        localStorage.setItem('soccer_pitch_tool_v1', JSON.stringify(saved));
+      } catch (e) {}
+    }
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem('soccer_pitch_tool_v1');
+        if (raw) {
+          const loaded = JSON.parse(raw);
+          if (loaded.length) state.length = loaded.length;
+          if (loaded.width) state.width = loaded.width;
+          if (loaded.goalWidth) state.goalWidth = loaded.goalWidth;
+          if (loaded.roundStep) state.roundStep = loaded.roundStep;
+          if (loaded.pythMultiplier) state.pythMultiplier = loaded.pythMultiplier;
+          if (loaded.tapeChecks) state.tapeChecks = loaded.tapeChecks;
+          if (loaded.stepChecks) state.stepChecks = loaded.stepChecks;
+
+          document.getElementById('goalWidthSelect').value = state.goalWidth.toFixed(1);
+          document.getElementById('roundStepSelect').value = state.roundStep.toFixed(1);
+
+          if (loaded.sunMode) {
+            state.sunMode = true;
+            document.body.classList.add('sun-mode');
+            document.getElementById('sunIcon').textContent = '🌿';
+            document.getElementById('sunLabel').textContent = '通常表示';
+          }
+        }
+      } catch (e) {}
+    }
+
+    /* ==========================================================================
+       初期化実行
+       ========================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      initPythSelect();
+      loadSettings();
+      updateAllUI();
+    });
+  </script>
+</body>
+</html>
