@@ -183,6 +183,21 @@
 
     <!-- 2. コート寸法 入力パネル -->
     <section class="sun-card bg-white rounded-xl p-3.5 shadow-sm border border-slate-200 space-y-3">
+      <!-- 比率連動コントロール & アスペクト比表示 -->
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100 text-xs">
+        <div class="flex items-center space-x-1.5">
+          <button type="button" id="toggleAspectLockBtn" class="py-1 px-2 rounded-lg border font-bold text-xs flex items-center space-x-1 transition active:scale-95 bg-pitch-50 border-pitch-400 text-pitch-800">
+            <span id="aspectLockIcon">🔗</span>
+            <span id="aspectLockLabel" class="text-[11px]">比率連動: ON</span>
+          </button>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-800 border border-emerald-200" id="aspectRatioBadge">比率 1 : 0.64 (適正)</span>
+        </div>
+        <button type="button" id="resetRatioBtn" title="標準比率（約65%）に横幅を自動補正" class="text-[10px] font-bold text-slate-600 hover:text-pitch-800 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded-lg border border-slate-200 transition active:scale-95 flex items-center space-x-0.5">
+          <span>✨</span>
+          <span>推奨比率に補正</span>
+        </button>
+      </div>
+
       <!-- 縦の長さ（タッチライン） -->
       <div>
         <div class="flex justify-between items-baseline mb-1">
@@ -512,6 +527,8 @@
       width: 32.0,
       goalWidth: 5.0,
       roundStep: 0.1,
+      aspectLock: true, // 比率連動モード (デフォルト ON)
+      aspectRatio: 32.0 / 50.0, // 縦に対する横の比率 (デフォルト 0.64)
       pythMultiplier: 4, // 3:4:5 の倍率 (デフォルト 4 = 12-16-20m)
       currentTab: 'pitch', // 'pitch' | 'tape' | 'steps'
       tapeTarget: 'goal',  // 'goal' | 'touch'
@@ -651,11 +668,46 @@
       // 手順書の再描画
       renderStepsList(data);
 
+      // アスペクト比バッジ & 連動ボタンスタイル更新
+      updateAspectUI();
+
       // プリセットバッジ更新
       checkActivePreset();
 
       // ローカルストレージ保存
       saveSettings();
+    }
+
+    /* アスペクト比表示とロックボタンのUI更新 */
+    function updateAspectUI() {
+      const currentRatio = state.width / state.length;
+      const badge = document.getElementById('aspectRatioBadge');
+      const ratioText = `比率 1 : ${currentRatio.toFixed(2)}`;
+      
+      badge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold border ';
+      if (currentRatio < 0.55) {
+        badge.textContent = `${ratioText} ⚠️細長め`;
+        badge.className += 'bg-amber-50 text-amber-800 border-amber-300';
+      } else if (currentRatio > 0.78) {
+        badge.textContent = `${ratioText} ⚠️横広め`;
+        badge.className += 'bg-amber-50 text-amber-800 border-amber-300';
+      } else {
+        badge.textContent = `${ratioText} ✅適正`;
+        badge.className += 'bg-emerald-50 text-emerald-800 border-emerald-200';
+      }
+
+      const lockBtn = document.getElementById('toggleAspectLockBtn');
+      const lockIcon = document.getElementById('aspectLockIcon');
+      const lockLabel = document.getElementById('aspectLockLabel');
+      if (state.aspectLock) {
+        lockBtn.className = 'py-1 px-2 rounded-lg border font-bold text-xs flex items-center space-x-1 transition active:scale-95 bg-pitch-50 border-pitch-400 text-pitch-800 shadow-sm';
+        lockIcon.textContent = '🔗';
+        lockLabel.textContent = '比率連動: ON';
+      } else {
+        lockBtn.className = 'py-1 px-2 rounded-lg border font-bold text-xs flex items-center space-x-1 transition active:scale-95 bg-slate-100 border-slate-300 text-slate-500';
+        lockIcon.textContent = '🔓';
+        lockLabel.textContent = '独立調整: OFF';
+      }
     }
 
     /* プリセット一致チェック */
@@ -1170,36 +1222,84 @@
     /* ==========================================================================
        操作ハンドラ & イベントリスナー
        ========================================================================== */
-    function adjustValue(field, delta) {
-      if (field === 'length') {
-        state.length = Math.min(Math.max(Number((state.length + delta).toFixed(1)), 30), 75);
-      } else if (field === 'width') {
-        state.width = Math.min(Math.max(Number((state.width + delta).toFixed(1)), 20), 55);
+    function setLength(newLen) {
+      state.length = Math.min(Math.max(roundValue(newLen, 0.5), 30), 75);
+      if (state.aspectLock) {
+        // 比率連動: 横幅を追従
+        const calculatedWidth = roundValue(state.length * state.aspectRatio, 0.5);
+        state.width = Math.min(Math.max(calculatedWidth, 20), 55);
+      } else {
+        // 独立調整: 現在比率を更新
+        state.aspectRatio = state.width / state.length;
       }
       updateAllUI();
     }
 
+    function setWidth(newWid) {
+      state.width = Math.min(Math.max(roundValue(newWid, 0.5), 20), 55);
+      if (state.aspectLock) {
+        // 比率連動: 縦の長さを追従
+        const calculatedLength = roundValue(state.width / state.aspectRatio, 0.5);
+        state.length = Math.min(Math.max(calculatedLength, 30), 75);
+      } else {
+        // 独立調整: 現在比率を更新
+        state.aspectRatio = state.width / state.length;
+      }
+      updateAllUI();
+    }
+
+    function adjustValue(field, delta) {
+      if (field === 'length') {
+        setLength(state.length + delta);
+      } else if (field === 'width') {
+        setWidth(state.width + delta);
+      }
+    }
+
     // スライダー入力
     document.getElementById('lengthRangeInput').addEventListener('input', (e) => {
-      state.length = parseFloat(e.target.value);
-      updateAllUI();
+      setLength(parseFloat(e.target.value));
     });
     document.getElementById('widthRangeInput').addEventListener('input', (e) => {
-      state.width = parseFloat(e.target.value);
-      updateAllUI();
+      setWidth(parseFloat(e.target.value));
     });
 
     // 数値ボックス直接入力
     document.getElementById('lengthNumberInput').addEventListener('change', (e) => {
       let val = parseFloat(e.target.value);
       if (isNaN(val)) val = 50.0;
-      state.length = Math.min(Math.max(val, 30), 75);
-      updateAllUI();
+      setLength(val);
     });
     document.getElementById('widthNumberInput').addEventListener('change', (e) => {
       let val = parseFloat(e.target.value);
       if (isNaN(val)) val = 32.0;
-      state.width = Math.min(Math.max(val, 20), 55);
+      setWidth(val);
+    });
+
+    // 比率連動トグルボタン
+    document.getElementById('toggleAspectLockBtn').addEventListener('click', () => {
+      state.aspectLock = !state.aspectLock;
+      if (state.aspectLock) {
+        state.aspectRatio = state.width / state.length;
+        showToast('🔗 縦横の比率連動を「ON」にしました');
+      } else {
+        showToast('🔓 敷地調整用の「独立調整」モードにしました');
+      }
+      updateAspectUI();
+      saveSettings();
+    });
+
+    // 推奨比率補正ボタン
+    document.getElementById('resetRatioBtn').addEventListener('click', () => {
+      let standardRatio = 0.66;
+      if (state.length >= 65) standardRatio = 50.0 / 68.0; // 公式68m基準
+      else if (state.length <= 52) standardRatio = 32.0 / 50.0; // U-8基準
+
+      state.aspectRatio = standardRatio;
+      const targetWidth = roundValue(state.length * standardRatio, 0.5);
+      state.width = Math.min(Math.max(targetWidth, 20), 55);
+      state.aspectLock = true;
+      showToast(`✨ 推奨黄金比（横幅: 縦×${Math.round(standardRatio*100)}%）に自動補正しました`);
       updateAllUI();
     });
 
@@ -1222,6 +1322,7 @@
           state.length = p.length;
           state.width = p.width;
           state.goalWidth = p.goalWidth;
+          state.aspectRatio = p.width / p.length;
           document.getElementById('goalWidthSelect').value = p.goalWidth.toFixed(1);
           showToast(`プリセット「${p.name}」を適用しました`);
           updateAllUI();
@@ -1435,6 +1536,8 @@
           width: state.width,
           goalWidth: state.goalWidth,
           roundStep: state.roundStep,
+          aspectLock: state.aspectLock,
+          aspectRatio: state.aspectRatio,
           pythMultiplier: state.pythMultiplier,
           sunMode: state.sunMode,
           tapeChecks: state.tapeChecks,
@@ -1453,6 +1556,8 @@
           if (loaded.width) state.width = loaded.width;
           if (loaded.goalWidth) state.goalWidth = loaded.goalWidth;
           if (loaded.roundStep) state.roundStep = loaded.roundStep;
+          if (loaded.aspectLock !== undefined) state.aspectLock = loaded.aspectLock;
+          if (loaded.aspectRatio) state.aspectRatio = loaded.aspectRatio;
           if (loaded.pythMultiplier) state.pythMultiplier = loaded.pythMultiplier;
           if (loaded.tapeChecks) state.tapeChecks = loaded.tapeChecks;
           if (loaded.stepChecks) state.stepChecks = loaded.stepChecks;
