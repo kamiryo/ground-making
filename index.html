@@ -968,11 +968,11 @@
       const pitchL = data.length; // 縦
       const pitchW = data.width;  // 横
 
-      // 余白設定: 右側と下側に目盛りラベル（1m, 5.5m, 16m...）を綺麗に収めるスペースを確保
-      const marginL = 5.0; // 左側
-      const marginR = state.showPitchMarks ? 8.8 : 5.0; // 右側ゴールライン目盛りバッジ用
-      const marginT = 4.0; // 上側
-      const marginB = state.showPitchMarks ? 6.2 : 5.0; // 下側タッチライン目盛りバッジ用
+      // 余白設定: 目盛りラベル（1m, 5.5m, 16m...）を特大フォントでゆったり綺麗に収めるスペースを確保
+      const marginL = state.showPitchMarks ? (isLandscape ? 11.5 : 7.0) : 4.5;
+      const marginR = state.showPitchMarks ? (isLandscape ? 12.5 : 12.5) : 4.5;
+      const marginT = state.showPitchMarks ? (isLandscape ? 6.5 : 10.5) : 4.5;
+      const marginB = state.showPitchMarks ? (isLandscape ? 8.5 : 6.5) : 4.5;
 
       const svgW = isLandscape ? (pitchL + marginL + marginR) : (pitchW + marginL + marginR);
       const svgH = isLandscape ? (pitchW + marginT + marginB) : (pitchL + marginT + marginB);
@@ -1011,88 +1011,141 @@
         const paOff = (pitchW - data.paWidth) / 2;
         const gaOff = (pitchW - data.gaWidth) / 2;
 
-        // STEP④風: 右ゴールライン目盛りピン & 数値バッジ (1m, 5.5m, 9.5m, 16m, 22.5m, 26.5m, 31m...)
+        // STEP④風: 右ゴールライン目盛りピン & 特大数値バッジ
+        // 0m(始点)は角の真上、32m(終点)は角の真下に逃がすことで 1m/31m との被りを物理的に完全解消！
         let goalMarksSvg = '';
         if (state.showPitchMarks) {
           const marks = [
-            { y: oy, dist: 0, label: "0m (始点)", color: "#ef4444", bg: "#dc2626" },
-            { y: oy + 1.0, dist: 1.0, label: "1m", color: "#38bdf8", bg: "#0284c7" },
-            { y: oy + paOff, dist: paOff, label: `${paOff.toFixed(1)}m (PA)`, color: "#60a5fa", bg: "#2563eb" },
-            { y: oy + gaOff, dist: gaOff, label: `${gaOff.toFixed(1)}m (GA)`, color: "#c084fc", bg: "#7c3aed" },
-            { y: oy + pitchW / 2, dist: pitchW / 2, label: `${(pitchW / 2).toFixed(1)}m (中央)`, color: "#facc15", bg: "#b45309" },
-            { y: oy + pitchW - gaOff, dist: pitchW - gaOff, label: `${(pitchW - gaOff).toFixed(1)}m (GA)`, color: "#c084fc", bg: "#7c3aed" },
-            { y: oy + pitchW - paOff, dist: pitchW - paOff, label: `${(pitchW - paOff).toFixed(1)}m (PA)`, color: "#60a5fa", bg: "#2563eb" },
-            { y: oy + pitchW - 1.0, dist: pitchW - 1.0, label: `${(pitchW - 1.0).toFixed(1)}m`, color: "#38bdf8", bg: "#0284c7" },
-            { y: oy + pitchW, dist: pitchW, label: `${pitchW.toFixed(1)}m (終点)`, color: "#ef4444", bg: "#dc2626" }
+            { y: oy + 1.0, dist: 1.0, sub: "アーク", color: "#38bdf8", bg: "#0284c7" },
+            { y: oy + paOff, dist: paOff, sub: "PA端", color: "#60a5fa", bg: "#1d4ed8" },
+            { y: oy + gaOff, dist: gaOff, sub: "GA端", color: "#c084fc", bg: "#7c3aed" },
+            { y: oy + pitchW / 2, dist: pitchW / 2, sub: "中央", color: "#facc15", bg: "#b45309" },
+            { y: oy + pitchW - gaOff, dist: pitchW - gaOff, sub: "GA端", color: "#c084fc", bg: "#7c3aed" },
+            { y: oy + pitchW - paOff, dist: pitchW - paOff, sub: "PA端", color: "#60a5fa", bg: "#1d4ed8" },
+            { y: oy + pitchW - 1.0, dist: pitchW - 1.0, sub: "アーク", color: "#38bdf8", bg: "#0284c7" }
           ];
 
           goalMarksSvg += `
             <!-- 右ゴールライン メジャー帯 -->
-            <line x1="${ox + pitchL}" y1="${oy}" x2="${ox + pitchL}" y2="${oy + pitchW}" stroke="#facc15" stroke-width="0.7" opacity="0.9" />
-            <text x="${ox + pitchL + 0.8}" y="${oy - 1.3}" fill="#facc15" font-size="1.1" font-weight="900">メジャー: ${pitchW.toFixed(1)}m ➔</text>
+            <line x1="${ox + pitchL}" y1="${oy}" x2="${ox + pitchL}" y2="${oy + pitchW}" stroke="#facc15" stroke-width="0.8" opacity="0.9" />
+            <text x="${ox + pitchL + 0.8}" y="${oy - 4.2}" fill="#facc15" font-size="1.8" font-weight="900">📏 メジャー: ${pitchW.toFixed(1)}m ➔</text>
+
+            <!-- 0m 始点バッジ (角の真上に逃がして1mとの被りをゼロに) -->
+            <circle cx="${ox + pitchL}" cy="${oy}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
+            <line x1="${ox + pitchL}" y1="${oy}" x2="${ox + pitchL}" y2="${oy - 1.2}" stroke="#ef4444" stroke-width="0.3" />
+            <rect x="${ox + pitchL - 4.5}" y="${oy - 3.8}" width="9.0" height="2.5" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchL}" y="${oy - 2.5}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="2.0" font-weight="900">0m</tspan> <tspan font-size="1.4" font-weight="bold" fill="#fef08a">始点</tspan>
+            </text>
+
+            <!-- 終点バッジ (角の斜め右下に配置して31mおよび49mとの被りをゼロに) -->
+            <circle cx="${ox + pitchL}" cy="${oy + pitchW}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
+            <line x1="${ox + pitchL}" y1="${oy + pitchW}" x2="${ox + pitchL + 1.2}" y2="${oy + pitchW + 1.2}" stroke="#ef4444" stroke-width="0.3" />
+            <rect x="${ox + pitchL + 1.3}" y="${oy + pitchW + 1.3}" width="10.2" height="2.6" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchL + 6.4}" y="${oy + pitchW + 2.6}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="2.0" font-weight="900">${pitchW.toFixed(1)}m</tspan> <tspan font-size="1.4" font-weight="bold" fill="#fef08a">終点</tspan>
+            </text>
           `;
 
           marks.forEach((m) => {
             goalMarksSvg += `
-              <circle cx="${ox + pitchL}" cy="${m.y}" r="0.5" fill="${m.color}" stroke="#ffffff" stroke-width="0.15" />
-              <line x1="${ox + pitchL}" y1="${m.y}" x2="${ox + pitchL + 0.8}" y2="${m.y}" stroke="${m.color}" stroke-width="0.15" />
-              <rect x="${ox + pitchL + 0.9}" y="${m.y - 0.75}" width="6.2" height="1.5" rx="0.35" fill="${m.bg}" stroke="#ffffff" stroke-width="0.12" opacity="0.95" />
-              <text x="${ox + pitchL + 4.0}" y="${m.y + 0.35}" fill="#ffffff" font-size="0.85" font-weight="900" text-anchor="middle">${m.label}</text>
+              <circle cx="${ox + pitchL}" cy="${m.y}" r="0.6" fill="${m.color}" stroke="#ffffff" stroke-width="0.2" />
+              <line x1="${ox + pitchL}" y1="${m.y}" x2="${ox + pitchL + 1.2}" y2="${m.y}" stroke="${m.color}" stroke-width="0.25" />
+              <rect x="${ox + pitchL + 1.3}" y="${m.y - 1.3}" width="9.5" height="2.6" rx="0.5" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+              <text x="${ox + pitchL + 6.05}" y="${m.y}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+                <tspan font-size="2.2" font-weight="900">${m.dist.toFixed(1)}m</tspan>
+                <tspan font-size="1.4" font-weight="bold" fill="#fef08a"> ${m.sub}</tspan>
+              </text>
             `;
           });
         }
 
-        // STEP④風: 下タッチライン目盛りピン & 数値バッジ (0m, 1m, 25m, 49m, 50m)
+        // STEP④風: 下タッチライン目盛りピン & 特大数値バッジ (1m, 25m, 49m)
         let touchMarksSvg = '';
         if (state.showPitchMarks) {
           const marks = [
-            { x: ox, dist: 0, label: "0m (始点)", color: "#ef4444", bg: "#dc2626" },
-            { x: ox + 1.0, dist: 1.0, label: "1m", color: "#38bdf8", bg: "#0284c7" },
-            { x: ox + pitchL / 2, dist: pitchL / 2, label: `${(pitchL / 2).toFixed(1)}m (中央)`, color: "#facc15", bg: "#b45309" },
-            { x: ox + pitchL - 1.0, dist: pitchL - 1.0, label: `${(pitchL - 1.0).toFixed(1)}m`, color: "#38bdf8", bg: "#0284c7" },
-            { x: ox + pitchL, dist: pitchL, label: `${pitchL.toFixed(1)}m (終点)`, color: "#ef4444", bg: "#dc2626" }
+            { x: ox + 1.0, dist: 1.0, sub: "アーク", align: "right", color: "#38bdf8", bg: "#0284c7" },
+            { x: ox + pitchL / 2, dist: pitchL / 2, sub: "中央", align: "center", color: "#facc15", bg: "#b45309" },
+            { x: ox + pitchL - 1.0, dist: pitchL - 1.0, sub: "アーク", align: "left", color: "#38bdf8", bg: "#0284c7" }
           ];
 
           touchMarksSvg += `
             <!-- 下タッチライン メジャー帯 -->
-            <line x1="${ox}" y1="${oy + pitchW}" x2="${ox + pitchL}" y2="${oy + pitchW}" stroke="#facc15" stroke-width="0.7" opacity="0.9" />
-            <text x="${ox + pitchL / 2}" y="${oy + pitchW + 4.6}" fill="#facc15" font-size="1.2" font-weight="900" text-anchor="middle">メジャー: ${pitchL.toFixed(1)}m ➔</text>
+            <line x1="${ox}" y1="${oy + pitchW}" x2="${ox + pitchL}" y2="${oy + pitchW}" stroke="#facc15" stroke-width="0.8" opacity="0.9" />
+            <text x="${ox + pitchL / 2}" y="${oy + pitchW + 6.2}" fill="#facc15" font-size="1.9" font-weight="900" text-anchor="middle">📏 メジャー: ${pitchL.toFixed(1)}m ➔</text>
+
+            <!-- 0m 始点バッジ (角の左上外側へ逃がして1mとの被りをゼロに) -->
+            <circle cx="${ox}" cy="${oy + pitchW}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
+            <line x1="${ox}" y1="${oy + pitchW}" x2="${ox - 1.2}" y2="${oy + pitchW - 1.4}" stroke="#ef4444" stroke-width="0.3" />
+            <rect x="${ox - 10.4}" y="${oy + pitchW - 3.2}" width="9.0" height="2.6" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox - 5.9}" y="${oy + pitchW - 1.9}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="2.0" font-weight="900">0m</tspan> <tspan font-size="1.4" font-weight="bold" fill="#fef08a">始点</tspan>
+            </text>
+
+            <!-- 終点ピン (50m) -->
+            <circle cx="${ox + pitchL}" cy="${oy + pitchW}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
           `;
 
           marks.forEach((m) => {
+            let rectX = m.x - 4.6;
+            let textX = m.x;
+            if (m.align === 'right') {
+              rectX = m.x - 0.4;
+              textX = m.x + 4.2;
+            } else if (m.align === 'left') {
+              rectX = m.x - 8.8;
+              textX = m.x - 4.2;
+            }
+
             touchMarksSvg += `
-              <circle cx="${m.x}" cy="${oy + pitchW}" r="0.5" fill="${m.color}" stroke="#ffffff" stroke-width="0.15" />
-              <line x1="${m.x}" y1="${oy + pitchW}" x2="${m.x}" y2="${oy + pitchW + 0.8}" stroke="${m.color}" stroke-width="0.15" />
-              <rect x="${m.x - 2.8}" y="${oy + pitchW + 0.9}" width="5.6" height="1.6" rx="0.35" fill="${m.bg}" stroke="#ffffff" stroke-width="0.12" opacity="0.95" />
-              <text x="${m.x}" y="${oy + pitchW + 2.05}" fill="#ffffff" font-size="0.85" font-weight="900" text-anchor="middle">${m.label}</text>
+              <circle cx="${m.x}" cy="${oy + pitchW}" r="0.6" fill="${m.color}" stroke="#ffffff" stroke-width="0.2" />
+              <line x1="${m.x}" y1="${oy + pitchW}" x2="${m.x}" y2="${oy + pitchW + 1.2}" stroke="${m.color}" stroke-width="0.25" />
+              <rect x="${rectX}" y="${oy + pitchW + 1.3}" width="9.2" height="2.6" rx="0.5" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+              <text x="${textX}" y="${oy + pitchW + 2.6}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+                <tspan font-size="2.2" font-weight="900">${m.dist.toFixed(1)}m</tspan>
+                <tspan font-size="1.4" font-weight="bold" fill="#fef08a"> ${m.sub}</tspan>
+              </text>
             `;
           });
         }
 
-        // STEP⑥風: ピッチ内エリア深さ・PKマークの寸法表示線
+        // STEP⑥風: ピッチ内エリア深さ・PKマークの特大寸法表示線
         let areaDimensionsSvg = '';
         if (state.showPitchMarks) {
           areaDimensionsSvg = `
             <!-- GA深さ寸法線 -->
-            <line x1="${ox}" y1="${midY - 4.2}" x2="${ox + data.gaDepth}" y2="${midY - 4.2}" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.3,0.3" />
-            <circle cx="${ox + data.gaDepth}" cy="${midY - 4.2}" r="0.25" fill="#38bdf8" />
-            <rect x="${ox + 0.2}" y="${midY - 5.5}" width="3.8" height="1.1" rx="0.2" fill="#0369a1" opacity="0.9" />
-            <text x="${ox + 2.1}" y="${midY - 4.7}" fill="#ffffff" font-size="0.75" font-weight="bold" text-anchor="middle">GA深さ: ${data.gaDepth}m</text>
+            <line x1="${ox}" y1="${midY - 4.5}" x2="${ox + data.gaDepth}" y2="${midY - 4.5}" stroke="#38bdf8" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
+            <circle cx="${ox + data.gaDepth}" cy="${midY - 4.5}" r="0.4" fill="#38bdf8" />
+            <rect x="${ox + 0.3}" y="${midY - 7.0}" width="8.2" height="2.3" rx="0.4" fill="#0369a1" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${ox + 4.4}" y="${midY - 5.85}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="1.8" font-weight="900">GA深さ: ${data.gaDepth}m</tspan>
+            </text>
 
             <!-- PA深さ寸法線 -->
-            <line x1="${ox}" y1="${midY + 4.2}" x2="${ox + data.paDepth}" y2="${midY + 4.2}" stroke="#60a5fa" stroke-width="0.25" stroke-dasharray="0.3,0.3" />
-            <circle cx="${ox + data.paDepth}" cy="${midY + 4.2}" r="0.25" fill="#60a5fa" />
-            <rect x="${ox + 0.2}" y="${midY + 4.6}" width="3.8" height="1.1" rx="0.2" fill="#1d4ed8" opacity="0.9" />
-            <text x="${ox + 2.1}" y="${midY + 5.4}" fill="#ffffff" font-size="0.75" font-weight="bold" text-anchor="middle">PA深さ: ${data.paDepth}m</text>
+            <line x1="${ox}" y1="${midY + 4.5}" x2="${ox + data.paDepth}" y2="${midY + 4.5}" stroke="#60a5fa" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
+            <circle cx="${ox + data.paDepth}" cy="${midY + 4.5}" r="0.4" fill="#60a5fa" />
+            <rect x="${ox + 0.3}" y="${midY + 4.9}" width="8.2" height="2.3" rx="0.4" fill="#1d4ed8" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${ox + 4.4}" y="${midY + 6.05}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="1.8" font-weight="900">PA深さ: ${data.paDepth}m</tspan>
+            </text>
 
             <!-- PKマーク距離表示 -->
-            <line x1="${ox}" y1="${midY}" x2="${ox + data.pkDist}" y2="${midY}" stroke="#facc15" stroke-width="0.3" stroke-dasharray="0.4,0.4" />
-            <rect x="${ox + 0.6}" y="${midY - 1.6}" width="3.4" height="1.1" rx="0.2" fill="#b45309" opacity="0.9" />
-            <text x="${ox + 2.3}" y="${midY - 0.8}" fill="#ffffff" font-size="0.75" font-weight="black" text-anchor="middle">PK: ${data.pkDist}m</text>
+            <line x1="${ox}" y1="${midY}" x2="${ox + data.pkDist}" y2="${midY}" stroke="#facc15" stroke-width="0.4" stroke-dasharray="0.6,0.6" />
+            <rect x="${ox + 0.5}" y="${midY - 2.8}" width="7.0" height="2.4" rx="0.4" fill="#b45309" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${ox + 4.0}" y="${midY - 1.6}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="1.9" font-weight="900">PK: ${data.pkDist}m</tspan>
+            </text>
 
             <!-- アーク半径 & サークル半径 -->
-            <text x="${ox + data.pkDist + 1.2}" y="${midY + 1.8}" fill="#facc15" font-size="0.85" font-weight="bold">アークR: ${data.penaltyArcRadius}m</text>
-            <text x="${midX}" y="${midY + data.circleRadius + 1.6}" fill="#22c55e" font-size="0.95" font-weight="black" text-anchor="middle">サークル半径: ${data.circleRadius}m</text>
+            <rect x="${ox + data.pkDist + 0.8}" y="${midY + 1.2}" width="9.0" height="2.3" rx="0.4" fill="#0f766e" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${ox + data.pkDist + 5.3}" y="${midY + 2.35}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="1.8" font-weight="900">アーク: R${data.penaltyArcRadius}m</tspan>
+            </text>
+
+            <rect x="${midX - 7.5}" y="${midY + data.circleRadius + 1.2}" width="15.0" height="2.7" rx="0.5" fill="#15803d" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${midX}" y="${midY + data.circleRadius + 2.55}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="2.0" font-weight="900">サークル半径: ${data.circleRadius}m</tspan>
+            </text>
           `;
         }
 
@@ -1108,19 +1161,19 @@
 
           <!-- センターサークル & マーク -->
           <circle cx="${midX}" cy="${midY}" r="${data.circleRadius}" fill="none" stroke="#ffffff" stroke-width="0.3" />
-          <circle cx="${midX}" cy="${midY}" r="0.4" fill="#ffffff" />
+          <circle cx="${midX}" cy="${midY}" r="0.45" fill="#ffffff" />
 
           <!-- 左側 ペナルティエリア & アーク & PK -->
           <rect x="${ox}" y="${paTop}" width="${data.paDepth}" height="${data.paWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" class="cursor-pointer hover:stroke-amber-300" onclick="showPitchPart('PA（ペナルティエリア）', '${data.paDepth}m × ${data.paWidth}m', '深さ: ${data.paDepth}m, 横幅: ${data.paWidth}m (端から ${paOff.toFixed(1)}m)')" />
           <rect x="${ox}" y="${gaTop}" width="${data.gaDepth}" height="${data.gaWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" class="cursor-pointer hover:stroke-amber-300" onclick="showPitchPart('GA（ゴールエリア）', '${data.gaDepth}m × ${data.gaWidth}m', '深さ: ${data.gaDepth}m, 横幅: ${data.gaWidth}m (端から ${gaOff.toFixed(1)}m)')" />
-          <circle cx="${ox + data.pkDist}" cy="${midY}" r="0.35" fill="#ffffff" />
+          <circle cx="${ox + data.pkDist}" cy="${midY}" r="0.4" fill="#ffffff" />
           <path d="M ${ox + data.paDepth} ${midY - Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} A ${data.penaltyArcRadius} ${data.penaltyArcRadius} 0 0 1 ${ox + data.paDepth} ${midY + Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))}" fill="none" stroke="#ffffff" stroke-width="0.3" />
           <rect x="${ox - 1.2}" y="${goalTop}" width="1.2" height="${data.goalWidth}" fill="#ffffff" fill-opacity="0.3" stroke="#facc15" stroke-width="0.4" />
 
           <!-- 右側 ペナルティエリア & アーク & PK -->
           <rect x="${ox + pitchL - data.paDepth}" y="${paTop}" width="${data.paDepth}" height="${data.paWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
           <rect x="${ox + pitchL - data.gaDepth}" y="${gaTop}" width="${data.gaDepth}" height="${data.gaWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
-          <circle cx="${ox + pitchL - data.pkDist}" cy="${midY}" r="0.35" fill="#ffffff" />
+          <circle cx="${ox + pitchL - data.pkDist}" cy="${midY}" r="0.4" fill="#ffffff" />
           <path d="M ${ox + pitchL - data.paDepth} ${midY - Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} A ${data.penaltyArcRadius} ${data.penaltyArcRadius} 0 0 0 ${ox + pitchL - data.paDepth} ${midY + Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))}" fill="none" stroke="#ffffff" stroke-width="0.3" />
           <rect x="${ox + pitchL}" y="${goalTop}" width="1.2" height="${data.goalWidth}" fill="#ffffff" fill-opacity="0.3" stroke="#facc15" stroke-width="0.4" />
 
@@ -1131,14 +1184,14 @@
           <path d="M ${ox + pitchL} ${oy + pitchW - data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 0 ${ox + pitchL - data.cornerArcRadius} ${oy + pitchW}" fill="none" stroke="#ffffff" stroke-width="0.25" />
 
           <!-- 直角出しガイド三角形 (左上コーナー) -->
-          <polygon points="${ox},${oy} ${ox + data.pyth.b},${oy} ${ox},${oy + data.pyth.a}" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.5,0.5" />
-          <text x="${ox + data.pyth.b / 2}" y="${oy - 0.8}" fill="#38bdf8" font-size="1.1" font-weight="bold" text-anchor="middle">${data.pyth.b}m(4)</text>
-          <text x="${ox - 0.8}" y="${oy + data.pyth.a / 2}" fill="#38bdf8" font-size="1.1" font-weight="bold" text-anchor="end">${data.pyth.a}m(3)</text>
-          <text x="${ox + data.pyth.b / 2 + 0.5}" y="${oy + data.pyth.a / 2 + 0.5}" fill="#facc15" font-size="1.1" font-weight="bold">${data.pyth.c}m(5)</text>
+          <polygon points="${ox},${oy} ${ox + data.pyth.b},${oy} ${ox},${oy + data.pyth.a}" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="0.3" stroke-dasharray="0.6,0.6" />
+          <text x="${ox + data.pyth.b / 2}" y="${oy - 1.2}" fill="#38bdf8" font-size="1.6" font-weight="bold" text-anchor="middle">${data.pyth.b}m(4)</text>
+          <text x="${ox - 1.2}" y="${oy + data.pyth.a / 2}" fill="#38bdf8" font-size="1.6" font-weight="bold" text-anchor="end">${data.pyth.a}m(3)</text>
+          <text x="${ox + data.pyth.b / 2 + 0.6}" y="${oy + data.pyth.a / 2 + 0.6}" fill="#facc15" font-size="1.6" font-weight="bold">${data.pyth.c}m(5)</text>
 
           <!-- 外枠寸法ラベル -->
-          <text x="${midX}" y="${oy - 1.8}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">縦: ${pitchL.toFixed(1)}m</text>
-          <text x="${ox - 2.0}" y="${midY}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 2.0} ${midY})">横: ${pitchW.toFixed(1)}m</text>
+          <text x="${midX}" y="${oy - 4.5}" fill="#ffffff" font-size="2.4" font-weight="900" text-anchor="middle">縦: ${pitchL.toFixed(1)}m</text>
+          <text x="${ox - 4.5}" y="${midY}" fill="#ffffff" font-size="2.4" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 4.5} ${midY})">横: ${pitchW.toFixed(1)}m</text>
 
           <!-- STEP④ & STEP⑥ 目盛り＆寸法オーバーレイ -->
           ${goalMarksSvg}
@@ -1157,52 +1210,93 @@
         const paOff = (pitchW - data.paWidth) / 2;
         const gaOff = (pitchW - data.gaWidth) / 2;
 
+        // 縦向き上ゴールライン: 0m/32mは左右外側、7つのピンは「2段ジグザグ配置」で横被りを完全防止！
         let goalMarksSvg = '';
         if (state.showPitchMarks) {
+          // tier1 (浅い段 oy - 3.2): 1m, 9.5m, 22.5m, 31m (間隔8.5m以上)
+          // tier2 (深い段 oy - 6.6): 5.5m, 16m, 26.5m (間隔10.5m以上)
           const marks = [
-            { x: ox, dist: 0, label: "0m", color: "#ef4444", bg: "#dc2626" },
-            { x: ox + 1.0, dist: 1.0, label: "1m", color: "#38bdf8", bg: "#0284c7" },
-            { x: ox + paOff, dist: paOff, label: `${paOff.toFixed(1)}m`, color: "#60a5fa", bg: "#2563eb" },
-            { x: ox + gaOff, dist: gaOff, label: `${gaOff.toFixed(1)}m`, color: "#c084fc", bg: "#7c3aed" },
-            { x: ox + pitchW / 2, dist: pitchW / 2, label: `${(pitchW / 2).toFixed(1)}m`, color: "#facc15", bg: "#b45309" },
-            { x: ox + pitchW - gaOff, dist: pitchW - gaOff, label: `${(pitchW - gaOff).toFixed(1)}m`, color: "#c084fc", bg: "#7c3aed" },
-            { x: ox + pitchW - paOff, dist: pitchW - paOff, label: `${(pitchW - paOff).toFixed(1)}m`, color: "#60a5fa", bg: "#2563eb" },
-            { x: ox + pitchW - 1.0, dist: pitchW - 1.0, label: `${(pitchW - 1.0).toFixed(1)}m`, color: "#38bdf8", bg: "#0284c7" },
-            { x: ox + pitchW, dist: pitchW, label: `${pitchW.toFixed(1)}m`, color: "#ef4444", bg: "#dc2626" }
+            { x: ox + 1.0, dist: 1.0, sub: "アーク", tier: 1, color: "#38bdf8", bg: "#0284c7" },
+            { x: ox + paOff, dist: paOff, sub: "PA端", tier: 2, color: "#60a5fa", bg: "#1d4ed8" },
+            { x: ox + gaOff, dist: gaOff, sub: "GA端", tier: 1, color: "#c084fc", bg: "#7c3aed" },
+            { x: ox + pitchW / 2, dist: pitchW / 2, sub: "中央", tier: 2, color: "#facc15", bg: "#b45309" },
+            { x: ox + pitchW - gaOff, dist: pitchW - gaOff, sub: "GA端", tier: 1, color: "#c084fc", bg: "#7c3aed" },
+            { x: ox + pitchW - paOff, dist: pitchW - paOff, sub: "PA端", tier: 2, color: "#60a5fa", bg: "#1d4ed8" },
+            { x: ox + pitchW - 1.0, dist: pitchW - 1.0, sub: "アーク", tier: 1, color: "#38bdf8", bg: "#0284c7" }
           ];
 
           goalMarksSvg += `
-            <line x1="${ox}" y1="${oy}" x2="${ox + pitchW}" y2="${oy}" stroke="#facc15" stroke-width="0.7" opacity="0.9" />
+            <line x1="${ox}" y1="${oy}" x2="${ox + pitchW}" y2="${oy}" stroke="#facc15" stroke-width="0.8" opacity="0.9" />
+            <text x="${midX}" y="${oy - 8.2}" fill="#facc15" font-size="1.9" font-weight="900" text-anchor="middle">📏 メジャー: ${pitchW.toFixed(1)}m ➔</text>
+
+            <!-- 0m 始点バッジ (左端外側へ逃がして1mとの被りをゼロに) -->
+            <circle cx="${ox}" cy="${oy}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
+            <line x1="${ox}" y1="${oy}" x2="${ox - 1.0}" y2="${oy}" stroke="#ef4444" stroke-width="0.3" />
+            <rect x="${ox - 9.2}" y="${oy - 1.3}" width="8.0" height="2.6" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox - 5.2}" y="${oy}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="2.0" font-weight="900">0m</tspan> <tspan font-size="1.4" font-weight="bold" fill="#fef08a">始点</tspan>
+            </text>
+
+            <!-- 終点バッジ (右端外側へ逃がして31mとの被りをゼロに) -->
+            <circle cx="${ox + pitchW}" cy="${oy}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
+            <line x1="${ox + pitchW}" y1="${oy}" x2="${ox + pitchW + 1.0}" y2="${oy}" stroke="#ef4444" stroke-width="0.3" />
+            <rect x="${ox + pitchW + 1.2}" y="${oy - 1.3}" width="9.0" height="2.6" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchW + 5.7}" y="${oy}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="2.0" font-weight="900">${pitchW.toFixed(1)}m</tspan> <tspan font-size="1.4" font-weight="bold" fill="#fef08a">終点</tspan>
+            </text>
           `;
+
           marks.forEach((m) => {
+            const isTier1 = (m.tier === 1);
+            const lineEndY = isTier1 ? (oy - 1.2) : (oy - 4.5);
+            const rectY = isTier1 ? (oy - 3.8) : (oy - 7.1);
+            const textY = isTier1 ? (oy - 2.5) : (oy - 5.8);
+
             goalMarksSvg += `
-              <circle cx="${m.x}" cy="${oy}" r="0.5" fill="${m.color}" stroke="#ffffff" stroke-width="0.15" />
-              <line x1="${m.x}" y1="${oy}" x2="${m.x}" y2="${oy - 0.8}" stroke="${m.color}" stroke-width="0.15" />
-              <rect x="${m.x - 2.5}" y="${oy - 2.4}" width="5.0" height="1.5" rx="0.3" fill="${m.bg}" stroke="#ffffff" stroke-width="0.12" opacity="0.95" />
-              <text x="${m.x}" y="${oy - 1.3}" fill="#ffffff" font-size="0.8" font-weight="900" text-anchor="middle">${m.label}</text>
+              <circle cx="${m.x}" cy="${oy}" r="0.6" fill="${m.color}" stroke="#ffffff" stroke-width="0.2" />
+              <line x1="${m.x}" y1="${oy}" x2="${m.x}" y2="${lineEndY}" stroke="${m.color}" stroke-width="0.25" ${!isTier1 ? 'stroke-dasharray="0.5,0.5"' : ''} />
+              <rect x="${m.x - 4.2}" y="${rectY}" width="8.4" height="2.6" rx="0.5" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+              <text x="${m.x}" y="${textY}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+                <tspan font-size="2.1" font-weight="900">${m.dist.toFixed(1)}m</tspan>
+                <tspan font-size="1.3" font-weight="bold" fill="#fef08a"> ${m.sub}</tspan>
+              </text>
             `;
           });
         }
 
+        // 縦向き右タッチライン (1m, 25m, 49m)
         let touchMarksSvg = '';
         if (state.showPitchMarks) {
           const marks = [
-            { y: oy, dist: 0, label: "0m (始点)", color: "#ef4444", bg: "#dc2626" },
-            { y: oy + 1.0, dist: 1.0, label: "1m", color: "#38bdf8", bg: "#0284c7" },
-            { y: oy + pitchL / 2, dist: pitchL / 2, label: `${(pitchL / 2).toFixed(1)}m (中央)`, color: "#facc15", bg: "#b45309" },
-            { y: oy + pitchL - 1.0, dist: pitchL - 1.0, label: `${(pitchL - 1.0).toFixed(1)}m`, color: "#38bdf8", bg: "#0284c7" },
-            { y: oy + pitchL, dist: pitchL, label: `${pitchL.toFixed(1)}m (終点)`, color: "#ef4444", bg: "#dc2626" }
+            { y: oy + 1.0, dist: 1.0, sub: "アーク", color: "#38bdf8", bg: "#0284c7" },
+            { y: oy + pitchL / 2, dist: pitchL / 2, sub: "中央", color: "#facc15", bg: "#b45309" },
+            { y: oy + pitchL - 1.0, dist: pitchL - 1.0, sub: "アーク", color: "#38bdf8", bg: "#0284c7" }
           ];
 
           touchMarksSvg += `
-            <line x1="${ox + pitchW}" y1="${oy}" x2="${ox + pitchW}" y2="${oy + pitchL}" stroke="#facc15" stroke-width="0.7" opacity="0.9" />
+            <line x1="${ox + pitchW}" y1="${oy}" x2="${ox + pitchW}" y2="${oy + pitchL}" stroke="#facc15" stroke-width="0.8" opacity="0.9" />
+            <text x="${ox + pitchW + 6.0}" y="${oy - 1.5}" fill="#facc15" font-size="1.8" font-weight="900">📏 50m ➔</text>
+
+            <!-- 0m 始点バッジ -->
+            <circle cx="${ox + pitchW}" cy="${oy}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
+            <!-- 終点バッジ -->
+            <circle cx="${ox + pitchW}" cy="${oy + pitchL}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
+            <line x1="${ox + pitchW}" y1="${oy + pitchL}" x2="${ox + pitchW + 1.2}" y2="${oy + pitchL}" stroke="#ef4444" stroke-width="0.3" />
+            <rect x="${ox + pitchW + 1.3}" y="${oy + pitchL - 1.3}" width="9.6" height="2.6" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchW + 6.1}" y="${oy + pitchL}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="2.0" font-weight="900">${pitchL.toFixed(1)}m</tspan> <tspan font-size="1.4" font-weight="bold" fill="#fef08a">終点</tspan>
+            </text>
           `;
+
           marks.forEach((m) => {
             touchMarksSvg += `
-              <circle cx="${ox + pitchW}" cy="${m.y}" r="0.5" fill="${m.color}" stroke="#ffffff" stroke-width="0.15" />
-              <line x1="${ox + pitchW}" y1="${m.y}" x2="${ox + pitchW + 0.8}" y2="${m.y}" stroke="${m.color}" stroke-width="0.15" />
-              <rect x="${ox + pitchW + 0.9}" y="${m.y - 0.75}" width="6.2" height="1.5" rx="0.3" fill="${m.bg}" stroke="#ffffff" stroke-width="0.12" opacity="0.95" />
-              <text x="${ox + pitchW + 4.0}" y="${m.y + 0.35}" fill="#ffffff" font-size="0.8" font-weight="900" text-anchor="middle">${m.label}</text>
+              <circle cx="${ox + pitchW}" cy="${m.y}" r="0.6" fill="${m.color}" stroke="#ffffff" stroke-width="0.2" />
+              <line x1="${ox + pitchW}" y1="${m.y}" x2="${ox + pitchW + 1.2}" y2="${m.y}" stroke="${m.color}" stroke-width="0.25" />
+              <rect x="${ox + pitchW + 1.3}" y="${m.y - 1.3}" width="9.6" height="2.6" rx="0.5" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+              <text x="${ox + pitchW + 6.1}" y="${m.y}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+                <tspan font-size="2.2" font-weight="900">${m.dist.toFixed(1)}m</tspan>
+                <tspan font-size="1.4" font-weight="bold" fill="#fef08a"> ${m.sub}</tspan>
+              </text>
             `;
           });
         }
@@ -1211,18 +1305,29 @@
         if (state.showPitchMarks) {
           areaDimensionsSvg = `
             <!-- GA深さ寸法 -->
-            <line x1="${midX + 4.2}" y1="${oy}" x2="${midX + 4.2}" y2="${oy + data.gaDepth}" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.3,0.3" />
-            <rect x="${midX + 4.6}" y="${oy + 0.5}" width="3.6" height="1.1" rx="0.2" fill="#0369a1" opacity="0.9" />
-            <text x="${midX + 6.4}" y="${oy + 1.3}" fill="#ffffff" font-size="0.75" font-weight="bold" text-anchor="middle">GA: ${data.gaDepth}m</text>
+            <line x1="${midX + 4.5}" y1="${oy}" x2="${midX + 4.5}" y2="${oy + data.gaDepth}" stroke="#38bdf8" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
+            <rect x="${midX + 5.0}" y="${oy + 0.5}" width="7.6" height="2.3" rx="0.4" fill="#0369a1" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${midX + 8.8}" y="${oy + 1.65}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="1.8" font-weight="900">GA: ${data.gaDepth}m</tspan>
+            </text>
 
             <!-- PA深さ寸法 -->
-            <line x1="${midX - 4.2}" y1="${oy}" x2="${midX - 4.2}" y2="${oy + data.paDepth}" stroke="#60a5fa" stroke-width="0.25" stroke-dasharray="0.3,0.3" />
-            <rect x="${midX - 8.4}" y="${oy + 0.5}" width="3.6" height="1.1" rx="0.2" fill="#1d4ed8" opacity="0.9" />
-            <text x="${midX - 6.6}" y="${oy + 1.3}" fill="#ffffff" font-size="0.75" font-weight="bold" text-anchor="middle">PA: ${data.paDepth}m</text>
+            <line x1="${midX - 4.5}" y1="${oy}" x2="${midX - 4.5}" y2="${oy + data.paDepth}" stroke="#60a5fa" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
+            <rect x="${midX - 12.8}" y="${oy + 0.5}" width="7.6" height="2.3" rx="0.4" fill="#1d4ed8" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${midX - 9.0}" y="${oy + 1.65}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="1.8" font-weight="900">PA: ${data.paDepth}m</tspan>
+            </text>
 
             <!-- PKマーク距離 -->
-            <text x="${midX}" y="${oy + data.pkDist - 0.6}" fill="#facc15" font-size="0.8" font-weight="black" text-anchor="middle">PK: ${data.pkDist}m</text>
-            <text x="${midX}" y="${midY + data.circleRadius + 1.6}" fill="#22c55e" font-size="0.95" font-weight="black" text-anchor="middle">サークル半径: ${data.circleRadius}m</text>
+            <rect x="${midX - 3.8}" y="${oy + data.pkDist - 2.8}" width="7.6" height="2.3" rx="0.4" fill="#b45309" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${midX}" y="${oy + data.pkDist - 1.65}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="1.9" font-weight="900">PK: ${data.pkDist}m</tspan>
+            </text>
+
+            <rect x="${midX - 8.0}" y="${midY + data.circleRadius + 1.2}" width="16.0" height="2.7" rx="0.5" fill="#15803d" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${midX}" y="${midY + data.circleRadius + 2.55}" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+              <tspan font-size="2.0" font-weight="900">サークル: R${data.circleRadius}m</tspan>
+            </text>
           `;
         }
 
@@ -1238,19 +1343,19 @@
 
           <!-- センターサークル -->
           <circle cx="${midX}" cy="${midY}" r="${data.circleRadius}" fill="none" stroke="#ffffff" stroke-width="0.3" />
-          <circle cx="${midX}" cy="${midY}" r="0.4" fill="#ffffff" />
+          <circle cx="${midX}" cy="${midY}" r="0.45" fill="#ffffff" />
 
           <!-- 上側 エリア -->
           <rect x="${paLeft}" y="${oy}" width="${data.paWidth}" height="${data.paDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
           <rect x="${gaLeft}" y="${oy}" width="${data.gaWidth}" height="${data.gaDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
-          <circle cx="${midX}" cy="${oy + data.pkDist}" r="0.35" fill="#ffffff" />
+          <circle cx="${midX}" cy="${oy + data.pkDist}" r="0.4" fill="#ffffff" />
           <path d="M ${midX - Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} ${oy + data.paDepth} A ${data.penaltyArcRadius} ${data.penaltyArcRadius} 0 0 0 ${midX + Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} ${oy + data.paDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
           <rect x="${goalLeft}" y="${oy - 1.2}" width="${data.goalWidth}" height="1.2" fill="#ffffff" fill-opacity="0.3" stroke="#facc15" stroke-width="0.4" />
 
           <!-- 下側 エリア -->
           <rect x="${paLeft}" y="${oy + pitchL - data.paDepth}" width="${data.paWidth}" height="${data.paDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
           <rect x="${gaLeft}" y="${oy + pitchL - data.gaDepth}" width="${data.gaWidth}" height="${data.gaDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
-          <circle cx="${midX}" cy="${oy + pitchL - data.pkDist}" r="0.35" fill="#ffffff" />
+          <circle cx="${midX}" cy="${oy + pitchL - data.pkDist}" r="0.4" fill="#ffffff" />
           <path d="M ${midX - Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} ${oy + pitchL - data.paDepth} A ${data.penaltyArcRadius} ${data.penaltyArcRadius} 0 0 1 ${midX + Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} ${oy + pitchL - data.paDepth}" fill="none" stroke="#ffffff" stroke-width="0.3" />
           <rect x="${goalLeft}" y="${oy + pitchL}" width="${data.goalWidth}" height="1.2" fill="#ffffff" fill-opacity="0.3" stroke="#facc15" stroke-width="0.4" />
 
@@ -1261,13 +1366,13 @@
           <path d="M ${ox + pitchW} ${oy + pitchL - data.cornerArcRadius} A ${data.cornerArcRadius} ${data.cornerArcRadius} 0 0 0 ${ox + pitchW - data.cornerArcRadius} ${oy + pitchL}" fill="none" stroke="#ffffff" stroke-width="0.25" />
 
           <!-- 直角出しガイド三角形 (左上) -->
-          <polygon points="${ox},${oy} ${ox + data.pyth.a},${oy} ${ox},${oy + data.pyth.b}" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.5,0.5" />
-          <text x="${ox + data.pyth.a / 2}" y="${oy - 0.8}" fill="#38bdf8" font-size="1.1" font-weight="bold" text-anchor="middle">${data.pyth.a}m(3)</text>
-          <text x="${ox - 0.8}" y="${oy + data.pyth.b / 2}" fill="#38bdf8" font-size="1.1" font-weight="bold" text-anchor="end">${data.pyth.b}m(4)</text>
+          <polygon points="${ox},${oy} ${ox + data.pyth.a},${oy} ${ox},${oy + data.pyth.b}" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="0.3" stroke-dasharray="0.6,0.6" />
+          <text x="${ox + data.pyth.a / 2}" y="${oy - 1.2}" fill="#38bdf8" font-size="1.6" font-weight="bold" text-anchor="middle">${data.pyth.a}m(3)</text>
+          <text x="${ox - 1.2}" y="${oy + data.pyth.b / 2}" fill="#38bdf8" font-size="1.6" font-weight="bold" text-anchor="end">${data.pyth.b}m(4)</text>
 
           <!-- 寸法ラベル -->
-          <text x="${midX}" y="${oy - 2.8}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">横: ${pitchW.toFixed(1)}m</text>
-          <text x="${ox - 1.8}" y="${midY}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 1.8} ${midY})">縦: ${pitchL.toFixed(1)}m</text>
+          <text x="${midX}" y="${oy - 7.5}" fill="#ffffff" font-size="2.4" font-weight="900" text-anchor="middle">横: ${pitchW.toFixed(1)}m</text>
+          <text x="${ox - 3.8}" y="${midY}" fill="#ffffff" font-size="2.4" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 3.8} ${midY})">縦: ${pitchL.toFixed(1)}m</text>
 
           <!-- STEP④ & STEP⑥ 目盛り＆寸法オーバーレイ -->
           ${goalMarksSvg}
@@ -1277,7 +1382,7 @@
       }
 
       container.innerHTML = `
-        <svg viewBox="0 0 ${svgW} ${svgH}" class="w-full h-auto max-h-[420px] drop-shadow-lg select-none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 ${svgW} ${svgH}" class="w-full h-auto max-h-[440px] drop-shadow-lg select-none" xmlns="http://www.w3.org/2000/svg">
           <!-- 背景芝生ベース -->
           <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="#14532d" />
           ${stripesSvg}
