@@ -415,11 +415,18 @@
             <span class="font-extrabold text-xs text-slate-800">ピッチ全体図</span>
             <span class="text-[10px] bg-slate-100 text-slate-600 font-semibold px-1.5 py-0.5 rounded">比率リアルタイム連動</span>
           </div>
-          <!-- 向き切り替え（縦/横） -->
-          <button id="toggleOrientationBtn" class="no-print text-[11px] font-bold text-pitch-700 bg-pitch-50 px-2 py-1 rounded-lg border border-pitch-200 flex items-center space-x-1 hover:bg-pitch-100 active:scale-95">
-            <span id="orientationIcon">🔄</span>
-            <span id="orientationLabel">横向き表示</span>
-          </button>
+          <div class="flex items-center space-x-1.5 no-print">
+            <!-- 設営目盛り表示切替 -->
+            <button id="togglePitchMarksBtn" class="text-[11px] font-bold text-pitch-800 bg-pitch-50 px-2 py-1 rounded-lg border border-pitch-300 flex items-center space-x-1 hover:bg-pitch-100 active:scale-95 shadow-sm">
+              <span>📍</span>
+              <span id="pitchMarksLabel">目盛り寸法: ON</span>
+            </button>
+            <!-- 向き切り替え（縦/横） -->
+            <button id="toggleOrientationBtn" class="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded-lg border border-slate-300 flex items-center space-x-1 hover:bg-slate-200 active:scale-95">
+              <span id="orientationIcon">🔄</span>
+              <span id="orientationLabel">横向き表示</span>
+            </button>
+          </div>
         </div>
 
         <!-- SVG描画コンテナ -->
@@ -667,6 +674,7 @@
       tapeTarget: 'goal',  // 'goal' | 'touch'
       tapeReverse: false,
       svgOrientation: 'landscape', // 'portrait' | 'landscape'
+      showPitchMarks: true, // ピッチ図上の目盛り寸法表示 (デフォルト ON)
       sunMode: false,
       wakeLockActive: false,
       selectedPitchPart: null,
@@ -951,7 +959,7 @@
     }
 
     /* ==========================================================================
-       SVG ピッチ図描画
+       SVG ピッチ図描画（STEP④・STEP⑥のメジャー目盛り＆寸法線オーバーレイ）
        ========================================================================== */
     function renderPitchSVG(data) {
       const container = document.getElementById('svgContainer');
@@ -960,12 +968,17 @@
       const pitchL = data.length; // 縦
       const pitchW = data.width;  // 横
 
-      const margin = 5; // 余白 (m)
-      const svgW = isLandscape ? (pitchL + margin * 2) : (pitchW + margin * 2);
-      const svgH = isLandscape ? (pitchW + margin * 2) : (pitchL + margin * 2);
+      // 余白設定: 右側と下側に目盛りラベル（1m, 5.5m, 16m...）を綺麗に収めるスペースを確保
+      const marginL = 5.0; // 左側
+      const marginR = state.showPitchMarks ? 8.8 : 5.0; // 右側ゴールライン目盛りバッジ用
+      const marginT = 4.0; // 上側
+      const marginB = state.showPitchMarks ? 6.2 : 5.0; // 下側タッチライン目盛りバッジ用
 
-      const ox = margin;
-      const oy = margin;
+      const svgW = isLandscape ? (pitchL + marginL + marginR) : (pitchW + marginL + marginR);
+      const svgH = isLandscape ? (pitchW + marginT + marginB) : (pitchL + marginT + marginB);
+
+      const ox = marginL;
+      const oy = marginT;
 
       // 芝生のストライプ本数
       const stripeCount = 10;
@@ -995,6 +1008,94 @@
         const gaTop = midY - data.gaWidth / 2;
         const goalTop = midY - data.goalWidth / 2;
 
+        const paOff = (pitchW - data.paWidth) / 2;
+        const gaOff = (pitchW - data.gaWidth) / 2;
+
+        // STEP④風: 右ゴールライン目盛りピン & 数値バッジ (1m, 5.5m, 9.5m, 16m, 22.5m, 26.5m, 31m...)
+        let goalMarksSvg = '';
+        if (state.showPitchMarks) {
+          const marks = [
+            { y: oy, dist: 0, label: "0m (始点)", color: "#ef4444", bg: "#dc2626" },
+            { y: oy + 1.0, dist: 1.0, label: "1m", color: "#38bdf8", bg: "#0284c7" },
+            { y: oy + paOff, dist: paOff, label: `${paOff.toFixed(1)}m (PA)`, color: "#60a5fa", bg: "#2563eb" },
+            { y: oy + gaOff, dist: gaOff, label: `${gaOff.toFixed(1)}m (GA)`, color: "#c084fc", bg: "#7c3aed" },
+            { y: oy + pitchW / 2, dist: pitchW / 2, label: `${(pitchW / 2).toFixed(1)}m (中央)`, color: "#facc15", bg: "#b45309" },
+            { y: oy + pitchW - gaOff, dist: pitchW - gaOff, label: `${(pitchW - gaOff).toFixed(1)}m (GA)`, color: "#c084fc", bg: "#7c3aed" },
+            { y: oy + pitchW - paOff, dist: pitchW - paOff, label: `${(pitchW - paOff).toFixed(1)}m (PA)`, color: "#60a5fa", bg: "#2563eb" },
+            { y: oy + pitchW - 1.0, dist: pitchW - 1.0, label: `${(pitchW - 1.0).toFixed(1)}m`, color: "#38bdf8", bg: "#0284c7" },
+            { y: oy + pitchW, dist: pitchW, label: `${pitchW.toFixed(1)}m (終点)`, color: "#ef4444", bg: "#dc2626" }
+          ];
+
+          goalMarksSvg += `
+            <!-- 右ゴールライン メジャー帯 -->
+            <line x1="${ox + pitchL}" y1="${oy}" x2="${ox + pitchL}" y2="${oy + pitchW}" stroke="#facc15" stroke-width="0.7" opacity="0.9" />
+            <text x="${ox + pitchL + 0.8}" y="${oy - 1.3}" fill="#facc15" font-size="1.1" font-weight="900">メジャー: ${pitchW.toFixed(1)}m ➔</text>
+          `;
+
+          marks.forEach((m) => {
+            goalMarksSvg += `
+              <circle cx="${ox + pitchL}" cy="${m.y}" r="0.5" fill="${m.color}" stroke="#ffffff" stroke-width="0.15" />
+              <line x1="${ox + pitchL}" y1="${m.y}" x2="${ox + pitchL + 0.8}" y2="${m.y}" stroke="${m.color}" stroke-width="0.15" />
+              <rect x="${ox + pitchL + 0.9}" y="${m.y - 0.75}" width="6.2" height="1.5" rx="0.35" fill="${m.bg}" stroke="#ffffff" stroke-width="0.12" opacity="0.95" />
+              <text x="${ox + pitchL + 4.0}" y="${m.y + 0.35}" fill="#ffffff" font-size="0.85" font-weight="900" text-anchor="middle">${m.label}</text>
+            `;
+          });
+        }
+
+        // STEP④風: 下タッチライン目盛りピン & 数値バッジ (0m, 1m, 25m, 49m, 50m)
+        let touchMarksSvg = '';
+        if (state.showPitchMarks) {
+          const marks = [
+            { x: ox, dist: 0, label: "0m (始点)", color: "#ef4444", bg: "#dc2626" },
+            { x: ox + 1.0, dist: 1.0, label: "1m", color: "#38bdf8", bg: "#0284c7" },
+            { x: ox + pitchL / 2, dist: pitchL / 2, label: `${(pitchL / 2).toFixed(1)}m (中央)`, color: "#facc15", bg: "#b45309" },
+            { x: ox + pitchL - 1.0, dist: pitchL - 1.0, label: `${(pitchL - 1.0).toFixed(1)}m`, color: "#38bdf8", bg: "#0284c7" },
+            { x: ox + pitchL, dist: pitchL, label: `${pitchL.toFixed(1)}m (終点)`, color: "#ef4444", bg: "#dc2626" }
+          ];
+
+          touchMarksSvg += `
+            <!-- 下タッチライン メジャー帯 -->
+            <line x1="${ox}" y1="${oy + pitchW}" x2="${ox + pitchL}" y2="${oy + pitchW}" stroke="#facc15" stroke-width="0.7" opacity="0.9" />
+            <text x="${ox + pitchL / 2}" y="${oy + pitchW + 4.6}" fill="#facc15" font-size="1.2" font-weight="900" text-anchor="middle">メジャー: ${pitchL.toFixed(1)}m ➔</text>
+          `;
+
+          marks.forEach((m) => {
+            touchMarksSvg += `
+              <circle cx="${m.x}" cy="${oy + pitchW}" r="0.5" fill="${m.color}" stroke="#ffffff" stroke-width="0.15" />
+              <line x1="${m.x}" y1="${oy + pitchW}" x2="${m.x}" y2="${oy + pitchW + 0.8}" stroke="${m.color}" stroke-width="0.15" />
+              <rect x="${m.x - 2.8}" y="${oy + pitchW + 0.9}" width="5.6" height="1.6" rx="0.35" fill="${m.bg}" stroke="#ffffff" stroke-width="0.12" opacity="0.95" />
+              <text x="${m.x}" y="${oy + pitchW + 2.05}" fill="#ffffff" font-size="0.85" font-weight="900" text-anchor="middle">${m.label}</text>
+            `;
+          });
+        }
+
+        // STEP⑥風: ピッチ内エリア深さ・PKマークの寸法表示線
+        let areaDimensionsSvg = '';
+        if (state.showPitchMarks) {
+          areaDimensionsSvg = `
+            <!-- GA深さ寸法線 -->
+            <line x1="${ox}" y1="${midY - 4.2}" x2="${ox + data.gaDepth}" y2="${midY - 4.2}" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.3,0.3" />
+            <circle cx="${ox + data.gaDepth}" cy="${midY - 4.2}" r="0.25" fill="#38bdf8" />
+            <rect x="${ox + 0.2}" y="${midY - 5.5}" width="3.8" height="1.1" rx="0.2" fill="#0369a1" opacity="0.9" />
+            <text x="${ox + 2.1}" y="${midY - 4.7}" fill="#ffffff" font-size="0.75" font-weight="bold" text-anchor="middle">GA深さ: ${data.gaDepth}m</text>
+
+            <!-- PA深さ寸法線 -->
+            <line x1="${ox}" y1="${midY + 4.2}" x2="${ox + data.paDepth}" y2="${midY + 4.2}" stroke="#60a5fa" stroke-width="0.25" stroke-dasharray="0.3,0.3" />
+            <circle cx="${ox + data.paDepth}" cy="${midY + 4.2}" r="0.25" fill="#60a5fa" />
+            <rect x="${ox + 0.2}" y="${midY + 4.6}" width="3.8" height="1.1" rx="0.2" fill="#1d4ed8" opacity="0.9" />
+            <text x="${ox + 2.1}" y="${midY + 5.4}" fill="#ffffff" font-size="0.75" font-weight="bold" text-anchor="middle">PA深さ: ${data.paDepth}m</text>
+
+            <!-- PKマーク距離表示 -->
+            <line x1="${ox}" y1="${midY}" x2="${ox + data.pkDist}" y2="${midY}" stroke="#facc15" stroke-width="0.3" stroke-dasharray="0.4,0.4" />
+            <rect x="${ox + 0.6}" y="${midY - 1.6}" width="3.4" height="1.1" rx="0.2" fill="#b45309" opacity="0.9" />
+            <text x="${ox + 2.3}" y="${midY - 0.8}" fill="#ffffff" font-size="0.75" font-weight="black" text-anchor="middle">PK: ${data.pkDist}m</text>
+
+            <!-- アーク半径 & サークル半径 -->
+            <text x="${ox + data.pkDist + 1.2}" y="${midY + 1.8}" fill="#facc15" font-size="0.85" font-weight="bold">アークR: ${data.penaltyArcRadius}m</text>
+            <text x="${midX}" y="${midY + data.circleRadius + 1.6}" fill="#22c55e" font-size="0.95" font-weight="black" text-anchor="middle">サークル半径: ${data.circleRadius}m</text>
+          `;
+        }
+
         pitchElements = `
           <!-- 外枠 (タッチライン・ゴールライン) -->
           <rect x="${ox}" y="${oy}" width="${pitchL}" height="${pitchW}" fill="none" stroke="#ffffff" stroke-width="0.35" />
@@ -1010,8 +1111,8 @@
           <circle cx="${midX}" cy="${midY}" r="0.4" fill="#ffffff" />
 
           <!-- 左側 ペナルティエリア & アーク & PK -->
-          <rect x="${ox}" y="${paTop}" width="${data.paDepth}" height="${data.paWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" class="cursor-pointer hover:stroke-amber-300" onclick="showPitchPart('PA（ペナルティエリア）', '${data.paDepth}m × ${data.paWidth}m', 'GKが手を使えるエリア。深さ: ${data.paDepth}m, 横幅: ${data.paWidth}m')" />
-          <rect x="${ox}" y="${gaTop}" width="${data.gaDepth}" height="${data.gaWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" class="cursor-pointer hover:stroke-amber-300" onclick="showPitchPart('GA（ゴールエリア）', '${data.gaDepth}m × ${data.gaWidth}m', 'ゴールキックを行うエリア。深さ: ${data.gaDepth}m, 横幅: ${data.gaWidth}m')" />
+          <rect x="${ox}" y="${paTop}" width="${data.paDepth}" height="${data.paWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" class="cursor-pointer hover:stroke-amber-300" onclick="showPitchPart('PA（ペナルティエリア）', '${data.paDepth}m × ${data.paWidth}m', '深さ: ${data.paDepth}m, 横幅: ${data.paWidth}m (端から ${paOff.toFixed(1)}m)')" />
+          <rect x="${ox}" y="${gaTop}" width="${data.gaDepth}" height="${data.gaWidth}" fill="none" stroke="#ffffff" stroke-width="0.3" class="cursor-pointer hover:stroke-amber-300" onclick="showPitchPart('GA（ゴールエリア）', '${data.gaDepth}m × ${data.gaWidth}m', '深さ: ${data.gaDepth}m, 横幅: ${data.gaWidth}m (端から ${gaOff.toFixed(1)}m)')" />
           <circle cx="${ox + data.pkDist}" cy="${midY}" r="0.35" fill="#ffffff" />
           <path d="M ${ox + data.paDepth} ${midY - Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))} A ${data.penaltyArcRadius} ${data.penaltyArcRadius} 0 0 1 ${ox + data.paDepth} ${midY + Math.sqrt(Math.max(0, data.penaltyArcRadius**2 - (data.paDepth - data.pkDist)**2))}" fill="none" stroke="#ffffff" stroke-width="0.3" />
           <rect x="${ox - 1.2}" y="${goalTop}" width="1.2" height="${data.goalWidth}" fill="#ffffff" fill-opacity="0.3" stroke="#facc15" stroke-width="0.4" />
@@ -1031,13 +1132,18 @@
 
           <!-- 直角出しガイド三角形 (左上コーナー) -->
           <polygon points="${ox},${oy} ${ox + data.pyth.b},${oy} ${ox},${oy + data.pyth.a}" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.5,0.5" />
-          <text x="${ox + data.pyth.b / 2}" y="${oy - 0.8}" fill="#38bdf8" font-size="1.2" font-weight="bold" text-anchor="middle">${data.pyth.b}m(4)</text>
-          <text x="${ox - 0.8}" y="${oy + data.pyth.a / 2}" fill="#38bdf8" font-size="1.2" font-weight="bold" text-anchor="end">${data.pyth.a}m(3)</text>
-          <text x="${ox + data.pyth.b / 2 + 0.5}" y="${oy + data.pyth.a / 2 + 0.5}" fill="#facc15" font-size="1.2" font-weight="bold">${data.pyth.c}m(5)</text>
+          <text x="${ox + data.pyth.b / 2}" y="${oy - 0.8}" fill="#38bdf8" font-size="1.1" font-weight="bold" text-anchor="middle">${data.pyth.b}m(4)</text>
+          <text x="${ox - 0.8}" y="${oy + data.pyth.a / 2}" fill="#38bdf8" font-size="1.1" font-weight="bold" text-anchor="end">${data.pyth.a}m(3)</text>
+          <text x="${ox + data.pyth.b / 2 + 0.5}" y="${oy + data.pyth.a / 2 + 0.5}" fill="#facc15" font-size="1.1" font-weight="bold">${data.pyth.c}m(5)</text>
 
-          <!-- 寸法ラベルオーバーレイ -->
+          <!-- 外枠寸法ラベル -->
           <text x="${midX}" y="${oy - 1.8}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">縦: ${pitchL.toFixed(1)}m</text>
-          <text x="${ox - 2.2}" y="${midY}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 2.2} ${midY})">横: ${pitchW.toFixed(1)}m</text>
+          <text x="${ox - 2.0}" y="${midY}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 2.0} ${midY})">横: ${pitchW.toFixed(1)}m</text>
+
+          <!-- STEP④ & STEP⑥ 目盛り＆寸法オーバーレイ -->
+          ${goalMarksSvg}
+          ${touchMarksSvg}
+          ${areaDimensionsSvg}
         `;
       } else {
         // 縦向き描画: 上ゴール ↔ 下ゴール
@@ -1047,6 +1153,78 @@
         const paLeft = midX - data.paWidth / 2;
         const gaLeft = midX - data.gaWidth / 2;
         const goalLeft = midX - data.goalWidth / 2;
+
+        const paOff = (pitchW - data.paWidth) / 2;
+        const gaOff = (pitchW - data.gaWidth) / 2;
+
+        let goalMarksSvg = '';
+        if (state.showPitchMarks) {
+          const marks = [
+            { x: ox, dist: 0, label: "0m", color: "#ef4444", bg: "#dc2626" },
+            { x: ox + 1.0, dist: 1.0, label: "1m", color: "#38bdf8", bg: "#0284c7" },
+            { x: ox + paOff, dist: paOff, label: `${paOff.toFixed(1)}m`, color: "#60a5fa", bg: "#2563eb" },
+            { x: ox + gaOff, dist: gaOff, label: `${gaOff.toFixed(1)}m`, color: "#c084fc", bg: "#7c3aed" },
+            { x: ox + pitchW / 2, dist: pitchW / 2, label: `${(pitchW / 2).toFixed(1)}m`, color: "#facc15", bg: "#b45309" },
+            { x: ox + pitchW - gaOff, dist: pitchW - gaOff, label: `${(pitchW - gaOff).toFixed(1)}m`, color: "#c084fc", bg: "#7c3aed" },
+            { x: ox + pitchW - paOff, dist: pitchW - paOff, label: `${(pitchW - paOff).toFixed(1)}m`, color: "#60a5fa", bg: "#2563eb" },
+            { x: ox + pitchW - 1.0, dist: pitchW - 1.0, label: `${(pitchW - 1.0).toFixed(1)}m`, color: "#38bdf8", bg: "#0284c7" },
+            { x: ox + pitchW, dist: pitchW, label: `${pitchW.toFixed(1)}m`, color: "#ef4444", bg: "#dc2626" }
+          ];
+
+          goalMarksSvg += `
+            <line x1="${ox}" y1="${oy}" x2="${ox + pitchW}" y2="${oy}" stroke="#facc15" stroke-width="0.7" opacity="0.9" />
+          `;
+          marks.forEach((m) => {
+            goalMarksSvg += `
+              <circle cx="${m.x}" cy="${oy}" r="0.5" fill="${m.color}" stroke="#ffffff" stroke-width="0.15" />
+              <line x1="${m.x}" y1="${oy}" x2="${m.x}" y2="${oy - 0.8}" stroke="${m.color}" stroke-width="0.15" />
+              <rect x="${m.x - 2.5}" y="${oy - 2.4}" width="5.0" height="1.5" rx="0.3" fill="${m.bg}" stroke="#ffffff" stroke-width="0.12" opacity="0.95" />
+              <text x="${m.x}" y="${oy - 1.3}" fill="#ffffff" font-size="0.8" font-weight="900" text-anchor="middle">${m.label}</text>
+            `;
+          });
+        }
+
+        let touchMarksSvg = '';
+        if (state.showPitchMarks) {
+          const marks = [
+            { y: oy, dist: 0, label: "0m (始点)", color: "#ef4444", bg: "#dc2626" },
+            { y: oy + 1.0, dist: 1.0, label: "1m", color: "#38bdf8", bg: "#0284c7" },
+            { y: oy + pitchL / 2, dist: pitchL / 2, label: `${(pitchL / 2).toFixed(1)}m (中央)`, color: "#facc15", bg: "#b45309" },
+            { y: oy + pitchL - 1.0, dist: pitchL - 1.0, label: `${(pitchL - 1.0).toFixed(1)}m`, color: "#38bdf8", bg: "#0284c7" },
+            { y: oy + pitchL, dist: pitchL, label: `${pitchL.toFixed(1)}m (終点)`, color: "#ef4444", bg: "#dc2626" }
+          ];
+
+          touchMarksSvg += `
+            <line x1="${ox + pitchW}" y1="${oy}" x2="${ox + pitchW}" y2="${oy + pitchL}" stroke="#facc15" stroke-width="0.7" opacity="0.9" />
+          `;
+          marks.forEach((m) => {
+            touchMarksSvg += `
+              <circle cx="${ox + pitchW}" cy="${m.y}" r="0.5" fill="${m.color}" stroke="#ffffff" stroke-width="0.15" />
+              <line x1="${ox + pitchW}" y1="${m.y}" x2="${ox + pitchW + 0.8}" y2="${m.y}" stroke="${m.color}" stroke-width="0.15" />
+              <rect x="${ox + pitchW + 0.9}" y="${m.y - 0.75}" width="6.2" height="1.5" rx="0.3" fill="${m.bg}" stroke="#ffffff" stroke-width="0.12" opacity="0.95" />
+              <text x="${ox + pitchW + 4.0}" y="${m.y + 0.35}" fill="#ffffff" font-size="0.8" font-weight="900" text-anchor="middle">${m.label}</text>
+            `;
+          });
+        }
+
+        let areaDimensionsSvg = '';
+        if (state.showPitchMarks) {
+          areaDimensionsSvg = `
+            <!-- GA深さ寸法 -->
+            <line x1="${midX + 4.2}" y1="${oy}" x2="${midX + 4.2}" y2="${oy + data.gaDepth}" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.3,0.3" />
+            <rect x="${midX + 4.6}" y="${oy + 0.5}" width="3.6" height="1.1" rx="0.2" fill="#0369a1" opacity="0.9" />
+            <text x="${midX + 6.4}" y="${oy + 1.3}" fill="#ffffff" font-size="0.75" font-weight="bold" text-anchor="middle">GA: ${data.gaDepth}m</text>
+
+            <!-- PA深さ寸法 -->
+            <line x1="${midX - 4.2}" y1="${oy}" x2="${midX - 4.2}" y2="${oy + data.paDepth}" stroke="#60a5fa" stroke-width="0.25" stroke-dasharray="0.3,0.3" />
+            <rect x="${midX - 8.4}" y="${oy + 0.5}" width="3.6" height="1.1" rx="0.2" fill="#1d4ed8" opacity="0.9" />
+            <text x="${midX - 6.6}" y="${oy + 1.3}" fill="#ffffff" font-size="0.75" font-weight="bold" text-anchor="middle">PA: ${data.paDepth}m</text>
+
+            <!-- PKマーク距離 -->
+            <text x="${midX}" y="${oy + data.pkDist - 0.6}" fill="#facc15" font-size="0.8" font-weight="black" text-anchor="middle">PK: ${data.pkDist}m</text>
+            <text x="${midX}" y="${midY + data.circleRadius + 1.6}" fill="#22c55e" font-size="0.95" font-weight="black" text-anchor="middle">サークル半径: ${data.circleRadius}m</text>
+          `;
+        }
 
         pitchElements = `
           <!-- 外枠 -->
@@ -1084,17 +1262,22 @@
 
           <!-- 直角出しガイド三角形 (左上) -->
           <polygon points="${ox},${oy} ${ox + data.pyth.a},${oy} ${ox},${oy + data.pyth.b}" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="0.25" stroke-dasharray="0.5,0.5" />
-          <text x="${ox + data.pyth.a / 2}" y="${oy - 0.8}" fill="#38bdf8" font-size="1.2" font-weight="bold" text-anchor="middle">${data.pyth.a}m(3)</text>
-          <text x="${ox - 0.8}" y="${oy + data.pyth.b / 2}" fill="#38bdf8" font-size="1.2" font-weight="bold" text-anchor="end">${data.pyth.b}m(4)</text>
+          <text x="${ox + data.pyth.a / 2}" y="${oy - 0.8}" fill="#38bdf8" font-size="1.1" font-weight="bold" text-anchor="middle">${data.pyth.a}m(3)</text>
+          <text x="${ox - 0.8}" y="${oy + data.pyth.b / 2}" fill="#38bdf8" font-size="1.1" font-weight="bold" text-anchor="end">${data.pyth.b}m(4)</text>
 
           <!-- 寸法ラベル -->
-          <text x="${midX}" y="${oy - 1.8}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">横: ${pitchW.toFixed(1)}m</text>
+          <text x="${midX}" y="${oy - 2.8}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">横: ${pitchW.toFixed(1)}m</text>
           <text x="${ox - 1.8}" y="${midY}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 1.8} ${midY})">縦: ${pitchL.toFixed(1)}m</text>
+
+          <!-- STEP④ & STEP⑥ 目盛り＆寸法オーバーレイ -->
+          ${goalMarksSvg}
+          ${touchMarksSvg}
+          ${areaDimensionsSvg}
         `;
       }
 
       container.innerHTML = `
-        <svg viewBox="0 0 ${svgW} ${svgH}" class="w-full h-auto max-h-[380px] drop-shadow-lg select-none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 ${svgW} ${svgH}" class="w-full h-auto max-h-[420px] drop-shadow-lg select-none" xmlns="http://www.w3.org/2000/svg">
           <!-- 背景芝生ベース -->
           <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="#14532d" />
           ${stripesSvg}
@@ -1688,6 +1871,34 @@
     document.getElementById('tabBtnTape').addEventListener('click', () => switchTab('tape'));
     document.getElementById('tabBtnSteps').addEventListener('click', () => switchTab('steps'));
 
+    // ピッチ図目盛り寸法トグル
+    function updatePitchMarksBtnUI() {
+      const btn = document.getElementById('togglePitchMarksBtn');
+      const label = document.getElementById('pitchMarksLabel');
+      if (!btn || !label) return;
+      if (state.showPitchMarks) {
+        btn.classList.add('text-pitch-800', 'bg-pitch-50', 'border-pitch-300', 'shadow-sm');
+        btn.classList.remove('text-slate-700', 'bg-slate-100', 'border-slate-300');
+        label.textContent = '目盛り寸法: ON';
+      } else {
+        btn.classList.remove('text-pitch-800', 'bg-pitch-50', 'border-pitch-300', 'shadow-sm');
+        btn.classList.add('text-slate-700', 'bg-slate-100', 'border-slate-300');
+        label.textContent = '目盛り寸法: OFF';
+      }
+    }
+
+    document.getElementById('togglePitchMarksBtn').addEventListener('click', () => {
+      state.showPitchMarks = !state.showPitchMarks;
+      updatePitchMarksBtnUI();
+      updateAllUI();
+      saveSettings();
+      if (state.showPitchMarks) {
+        showToast('📍 ピッチ図上にメジャー目盛り寸法を表示しました');
+      } else {
+        showToast('ピッチ図をシンプル表示にしました');
+      }
+    });
+
     // SVG向き切替（縦/横）
     document.getElementById('toggleOrientationBtn').addEventListener('click', () => {
       state.svgOrientation = (state.svgOrientation === 'landscape' ? 'portrait' : 'landscape');
@@ -1857,6 +2068,7 @@
           aspectRatio: state.aspectRatio,
           customOverrides: state.customOverrides,
           pythMultiplier: state.pythMultiplier,
+          showPitchMarks: state.showPitchMarks,
           sunMode: state.sunMode,
           tapeChecks: state.tapeChecks,
           stepChecks: state.stepChecks
@@ -1880,6 +2092,10 @@
           if (loaded.pythMultiplier) state.pythMultiplier = loaded.pythMultiplier;
           if (loaded.tapeChecks) state.tapeChecks = loaded.tapeChecks;
           if (loaded.stepChecks) state.stepChecks = loaded.stepChecks;
+          if (loaded.showPitchMarks !== undefined) {
+            state.showPitchMarks = loaded.showPitchMarks;
+            updatePitchMarksBtnUI();
+          }
 
           document.getElementById('goalWidthSelect').value = state.goalWidth.toFixed(1);
           document.getElementById('roundStepSelect').value = state.roundStep.toFixed(1);
