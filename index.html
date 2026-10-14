@@ -140,8 +140,14 @@
           <span class="text-[11px] hidden sm:inline" id="wakeLockText">常時ON</span>
         </button>
 
+        <!-- URL共有ボタン -->
+        <button id="shareUrlBtn" title="寸法共有URLをコピー" class="px-2 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs flex items-center space-x-1 border border-amber-300 shadow-sm transition active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+          <span class="text-[11px] hidden sm:inline">URL共有</span>
+        </button>
+
         <!-- LINE共有用コピー -->
-        <button id="shareSummaryBtn" title="設営寸法をコピー" class="p-1.5 rounded-lg bg-pitch-700 hover:bg-pitch-600 text-white font-bold text-xs border border-pitch-600 transition active:scale-95">
+        <button id="shareSummaryBtn" title="設営寸法テキストをコピー" class="p-1.5 rounded-lg bg-pitch-700 hover:bg-pitch-600 text-white font-bold text-xs border border-pitch-600 transition active:scale-95">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
         </button>
 
@@ -283,10 +289,16 @@
         <!-- 展開パネル -->
         <div id="customAreaPanel" class="mt-2 space-y-2.5 p-3 bg-slate-50 border border-slate-200 rounded-xl hidden text-xs">
           <div class="flex items-center justify-between pb-1.5 border-b border-slate-200 text-[10px] text-slate-500">
-            <span>※変更した項目だけ上書きされます（他は比率維持）</span>
-            <button type="button" id="resetAllOverridesBtn" class="text-pitch-700 hover:text-pitch-900 font-bold bg-white px-2 py-0.5 rounded border border-slate-300 active:scale-95">
-              ✨ 全て自動に戻す
-            </button>
+            <span>※変更した項目だけ上書き（他は比率維持）</span>
+            <div class="flex items-center space-x-1">
+              <button type="button" id="shareCustomUrlBtn" class="text-amber-800 bg-amber-100 hover:bg-amber-200 font-bold px-2 py-0.5 rounded border border-amber-300 active:scale-95 flex items-center space-x-0.5" title="このカスタム寸法をURLで共有">
+                <span>🔗</span>
+                <span>共有URL</span>
+              </button>
+              <button type="button" id="resetAllOverridesBtn" class="text-pitch-700 hover:text-pitch-900 font-bold bg-white px-2 py-0.5 rounded border border-slate-300 active:scale-95">
+                ✨ 全て自動に戻す
+              </button>
+            </div>
           </div>
 
           <!-- 1. PA 深さ -->
@@ -862,6 +874,9 @@
 
       // ローカルストレージ保存
       saveSettings();
+
+      // ブラウザアドレスバーのURL同期 (パラメータ更新)
+      syncURL();
     }
 
     /* 各エリアカスタム入力欄のUI同期 */
@@ -942,14 +957,40 @@
       }
     }
 
+    /* アクティブなプリセットのキーを判定（オーバーライドの有無も厳密に照合） */
+    function getActivePresetKey() {
+      const ov = state.customOverrides || {};
+      const hasOverrides = Object.values(ov).some(v => v !== null && v !== undefined);
+
+      for (const [key, p] of Object.entries(PRESETS)) {
+        if (p.length === state.length && p.width === state.width && p.goalWidth === state.goalWidth) {
+          const pOverrides = p.overrides || {};
+          const pHasOverrides = Object.keys(pOverrides).length > 0;
+
+          if (!hasOverrides && !pHasOverrides) {
+            return key;
+          }
+          if (hasOverrides && pHasOverrides) {
+            const allMatch = Object.entries(pOverrides).every(([k, v]) => ov[k] === v);
+            const noExtra = Object.entries(ov).every(([k, v]) => v === null || v === undefined || pOverrides[k] === v);
+            if (allMatch && noExtra) {
+              return key;
+            }
+          }
+        }
+      }
+      return null;
+    }
+
     /* プリセット一致チェック */
     function checkActivePreset() {
+      const activeKey = getActivePresetKey();
       let matched = 'カスタム';
       document.querySelectorAll('.preset-btn').forEach(btn => {
         const pKey = btn.dataset.preset;
-        const p = PRESETS[pKey];
-        if (p && p.length === state.length && p.width === state.width && p.goalWidth === state.goalWidth) {
-          matched = p.name.split(' ')[0];
+        if (pKey === activeKey) {
+          const p = PRESETS[pKey];
+          matched = p ? p.name.split(' ')[0] : 'カスタム';
           btn.classList.add('border-pitch-600', 'bg-pitch-50');
         } else {
           btn.classList.remove('border-pitch-600', 'bg-pitch-50');
@@ -2128,7 +2169,7 @@
         `${(data.width - (data.width - data.paWidth)/2).toFixed(1)}m: PA右端`,
         `${data.width.toFixed(1)}m: 反対コーナー`,
         `----------------`,
-        `Webツールで確認: ${window.location.href}`
+        `Webツールで確認: ${getShareableURL()}`
       ].join('\n');
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -2140,6 +2181,35 @@
       }
     });
 
+    // 🔗 URL共有ボタン（ヘッダー & カスタムパネル）
+    function handleShareUrlClick() {
+      copyShareableURL();
+    }
+    const shareUrlBtn = document.getElementById('shareUrlBtn');
+    if (shareUrlBtn) shareUrlBtn.addEventListener('click', handleShareUrlClick);
+
+    const shareCustomUrlBtn = document.getElementById('shareCustomUrlBtn');
+    if (shareCustomUrlBtn) shareCustomUrlBtn.addEventListener('click', handleShareUrlClick);
+
+    function copyShareableURL() {
+      const url = getShareableURL();
+      fallbackCopyUrl(url);
+    }
+
+    function fallbackCopyUrl(url) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast('🔗 共有用URLをコピーしました！他の端末で同じ寸法を開けます');
+        }).catch(() => {
+          fallbackCopy(url);
+          showToast('🔗 共有用URLをコピーしました！他の端末で同じ寸法を開けます');
+        });
+      } else {
+        fallbackCopy(url);
+        showToast('🔗 共有用URLをコピーしました！他の端末で同じ寸法を開けます');
+      }
+    }
+
     function fallbackCopy(text) {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -2147,7 +2217,7 @@
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
-      showToast('📋 設営テキストをクリップボードにコピーしました！');
+      showToast('📋 クリップボードにコピーしました！');
     }
 
     // トースト表示
@@ -2158,6 +2228,166 @@
       setTimeout(() => {
         toast.classList.add('opacity-0', 'pointer-events-none');
       }, 2500);
+    }
+
+    /* ==========================================================================
+       URLパラメータ共有 & 復元
+       ========================================================================== */
+    function getShareableURL() {
+      const url = new URL(window.location.origin + window.location.pathname);
+      const activePresetKey = getActivePresetKey();
+
+      if (activePresetKey) {
+        url.searchParams.set('preset', activePresetKey);
+        if (state.goalWidth !== 5.0) {
+          url.searchParams.set('gw', state.goalWidth.toFixed(1));
+        }
+      } else {
+        url.searchParams.set('l', state.length.toFixed(1));
+        url.searchParams.set('w', state.width.toFixed(1));
+        if (state.goalWidth !== 5.0) {
+          url.searchParams.set('gw', state.goalWidth.toFixed(1));
+        }
+
+        const ov = state.customOverrides || {};
+        const keyMap = {
+          paDepth: 'pad',
+          paWidth: 'paw',
+          gaDepth: 'gad',
+          gaWidth: 'gaw',
+          pkDist: 'pk',
+          circleRadius: 'cr',
+          penaltyArcRadius: 'ar'
+        };
+        for (const [k, p] of Object.entries(keyMap)) {
+          if (ov[k] !== null && ov[k] !== undefined) {
+            url.searchParams.set(p, Number(ov[k]).toFixed(1));
+          }
+        }
+      }
+
+      if (state.svgOrientation === 'portrait') {
+        url.searchParams.set('ori', 'p');
+      }
+
+      return url.toString();
+    }
+
+    let syncURLTimeout = null;
+    function syncURL() {
+      if (!window.history || !window.history.replaceState) return;
+      if (syncURLTimeout) clearTimeout(syncURLTimeout);
+      syncURLTimeout = setTimeout(() => {
+        try {
+          const shareUrl = getShareableURL();
+          window.history.replaceState(null, '', shareUrl);
+        } catch (e) {}
+      }, 200);
+    }
+
+    function loadSettingsFromURL() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.toString()) return false;
+
+        let loaded = false;
+
+        // 1. プリセット指定があれば先に展開
+        const presetKey = params.get('preset');
+        if (presetKey && PRESETS[presetKey]) {
+          const p = PRESETS[presetKey];
+          state.length = p.length;
+          state.width = p.width;
+          state.goalWidth = p.goalWidth;
+          state.aspectRatio = p.width / p.length;
+          state.customOverrides = {
+            paDepth: null,
+            paWidth: null,
+            gaDepth: null,
+            gaWidth: null,
+            pkDist: null,
+            circleRadius: null,
+            penaltyArcRadius: null,
+            ...(p.overrides || {})
+          };
+          loaded = true;
+        }
+
+        // 2. 縦横寸法 (プリセットより優先)
+        const l = parseFloat(params.get('l') || params.get('length'));
+        const w = parseFloat(params.get('w') || params.get('width'));
+        if (!isNaN(l) && l >= 20 && l <= 120) {
+          state.length = l;
+          loaded = true;
+        }
+        if (!isNaN(w) && w >= 15 && w <= 90) {
+          state.width = w;
+          loaded = true;
+        }
+        if (loaded && state.length && state.width) {
+          state.aspectRatio = state.width / state.length;
+        }
+
+        // 3. ゴール幅
+        const gw = parseFloat(params.get('gw') || params.get('goalWidth'));
+        if (!isNaN(gw) && gw > 0) {
+          state.goalWidth = gw;
+          const gwEl = document.getElementById('goalWidthSelect');
+          if (gwEl) gwEl.value = gw.toFixed(1);
+        }
+
+        // 4. エリア寸法のオーバーライド
+        const overrideParamMap = {
+          paDepth: ['pad', 'paDepth'],
+          paWidth: ['paw', 'paWidth'],
+          gaDepth: ['gad', 'gaDepth'],
+          gaWidth: ['gaw', 'gaWidth'],
+          pkDist: ['pk', 'pkDist'],
+          circleRadius: ['cr', 'circleRadius'],
+          penaltyArcRadius: ['ar', 'penaltyArcRadius']
+        };
+
+        for (const [key, paramNames] of Object.entries(overrideParamMap)) {
+          for (const name of paramNames) {
+            if (params.has(name)) {
+              const val = parseFloat(params.get(name));
+              if (!isNaN(val) && val > 0 && val < 60) {
+                if (!state.customOverrides) state.customOverrides = {};
+                state.customOverrides[key] = val;
+                loaded = true;
+              }
+              break;
+            }
+          }
+        }
+
+        // 5. 向き
+        const ori = params.get('ori') || params.get('orientation');
+        if (ori === 'p' || ori === 'portrait') {
+          state.svgOrientation = 'portrait';
+          const oriLabel = document.getElementById('orientationLabel');
+          if (oriLabel) oriLabel.textContent = '横向き表示';
+        } else if (ori === 'l' || ori === 'landscape') {
+          state.svgOrientation = 'landscape';
+          const oriLabel = document.getElementById('orientationLabel');
+          if (oriLabel) oriLabel.textContent = '縦向き表示';
+        }
+
+        // 6. 目盛り表示
+        const marks = params.get('marks');
+        if (marks === '0' || marks === 'false') {
+          state.showPitchMarks = false;
+          updatePitchMarksBtnUI();
+        } else if (marks === '1' || marks === 'true') {
+          state.showPitchMarks = true;
+          updatePitchMarksBtnUI();
+        }
+
+        return loaded;
+      } catch (e) {
+        console.warn('URLパラメータの読み込みに失敗しました:', e);
+        return false;
+      }
     }
 
     /* ==========================================================================
@@ -2221,7 +2451,10 @@
        ========================================================================== */
     window.addEventListener('DOMContentLoaded', () => {
       initPythSelect();
-      loadSettings();
+      const hasUrlParams = loadSettingsFromURL();
+      if (!hasUrlParams) {
+        loadSettings();
+      }
       updateAllUI();
     });
   </script>
