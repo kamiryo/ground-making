@@ -165,18 +165,22 @@
         </span>
         <span class="text-[11px] text-pitch-700 font-bold bg-pitch-50 px-2 py-0.5 rounded-full" id="activePresetBadge">カスタム</span>
       </div>
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
         <button type="button" data-preset="u8" class="preset-btn py-2 px-1 text-center rounded-lg border-2 border-slate-200 font-bold text-xs hover:border-pitch-600 transition active:scale-95">
-          <div class="text-[13px] text-slate-800">U-8 ミニ</div>
-          <div class="text-[10px] text-slate-500">50 × 32m</div>
+          <div class="text-[12px] text-slate-800">U-8 比率</div>
+          <div class="text-[10px] text-slate-500">50×32m (PA:8m)</div>
+        </button>
+        <button type="button" data-preset="u8_genesis" class="preset-btn py-2 px-1 text-center rounded-lg border-2 border-amber-300 bg-amber-50/50 font-bold text-xs hover:border-pitch-600 transition active:scale-95">
+          <div class="text-[12px] text-amber-900 flex items-center justify-center">U-8 GENESIS <span class="text-[9px] ml-0.5">★</span></div>
+          <div class="text-[10px] text-amber-700">50×32m (PA:10m)</div>
         </button>
         <button type="button" data-preset="u10" class="preset-btn py-2 px-1 text-center rounded-lg border-2 border-slate-200 font-bold text-xs hover:border-pitch-600 transition active:scale-95">
-          <div class="text-[13px] text-slate-800">U-10 標準</div>
+          <div class="text-[12px] text-slate-800">U-10 標準</div>
           <div class="text-[10px] text-slate-500">60 × 40m</div>
         </button>
         <button type="button" data-preset="official" class="preset-btn py-2 px-1 text-center rounded-lg border-2 border-pitch-600 bg-pitch-50 font-bold text-xs hover:border-pitch-600 transition active:scale-95">
-          <div class="text-[13px] text-pitch-800">公式 8人制</div>
-          <div class="text-[10px] text-pitch-700 font-semibold">68 × 50m</div>
+          <div class="text-[12px] text-pitch-800">公式 8人制</div>
+          <div class="text-[10px] text-pitch-700 font-semibold">68 × 50m (JFA)</div>
         </button>
       </div>
     </section>
@@ -262,6 +266,126 @@
             <option value="0.1" selected>0.1m 単位 (精密)</option>
             <option value="0.5">0.5m 単位 (測りやすい)</option>
           </select>
+        </div>
+      </div>
+
+      <!-- ⚙️ 各エリア寸法の個別カスタマイズ（オプション展開パネル） -->
+      <div class="pt-2 border-t border-slate-100">
+        <button type="button" id="toggleCustomAreaBtn" class="w-full flex items-center justify-between py-2 px-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-700 text-xs font-bold transition border border-slate-200 active:scale-95">
+          <span class="flex items-center space-x-1.5">
+            <span class="text-pitch-600">⚙️</span>
+            <span>各エリア寸法の個別カスタマイズ (7項目)</span>
+            <span id="customAreaBadge" class="hidden text-[9px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded font-extrabold">カスタム中</span>
+          </span>
+          <span id="customAreaArrow" class="text-slate-400 text-[10px] font-semibold">▼ 詳細変更</span>
+        </button>
+
+        <!-- 展開パネル -->
+        <div id="customAreaPanel" class="mt-2 space-y-2.5 p-3 bg-slate-50 border border-slate-200 rounded-xl hidden text-xs">
+          <div class="flex items-center justify-between pb-1.5 border-b border-slate-200 text-[10px] text-slate-500">
+            <span>※変更した項目だけ上書きされます（他は比率維持）</span>
+            <button type="button" id="resetAllOverridesBtn" class="text-pitch-700 hover:text-pitch-900 font-bold bg-white px-2 py-0.5 rounded border border-slate-300 active:scale-95">
+              ✨ 全て自動に戻す
+            </button>
+          </div>
+
+          <!-- 1. PA 深さ -->
+          <div class="flex items-center justify-between py-0.5">
+            <div>
+              <span class="font-black text-slate-800 text-xs">🔲 PA 深さ</span>
+              <span class="text-[10px] text-slate-400 block" id="hintPaDepth">自動: 8.0m</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('paDepth', -0.5)">−</button>
+              <input type="number" id="inputOverridePaDepth" step="0.5" class="w-14 text-center font-black text-slate-900 bg-white border border-slate-300 rounded-lg py-1 text-xs">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('paDepth', 0.5)">＋</button>
+              <button type="button" class="p-1 text-slate-400 hover:text-pitch-700 text-xs" onclick="clearOverride('paDepth')" title="比率自動計算に戻す">🔄</button>
+            </div>
+          </div>
+
+          <!-- 2. PA 横幅 -->
+          <div class="flex items-center justify-between py-0.5">
+            <div>
+              <span class="font-black text-slate-800 text-xs">🔲 PA 横幅</span>
+              <span class="text-[10px] text-slate-400 block" id="hintPaWidth">自動: 20.8m</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('paWidth', -0.5)">−</button>
+              <input type="number" id="inputOverridePaWidth" step="0.5" class="w-14 text-center font-black text-slate-900 bg-white border border-slate-300 rounded-lg py-1 text-xs">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('paWidth', 0.5)">＋</button>
+              <button type="button" class="p-1 text-slate-400 hover:text-pitch-700 text-xs" onclick="clearOverride('paWidth')" title="比率自動計算に戻す">🔄</button>
+            </div>
+          </div>
+
+          <!-- 3. GA 深さ -->
+          <div class="flex items-center justify-between py-0.5">
+            <div>
+              <span class="font-black text-slate-800 text-xs">▫️ GA 深さ</span>
+              <span class="text-[10px] text-slate-400 block" id="hintGaDepth">自動: 4.0m</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('gaDepth', -0.5)">−</button>
+              <input type="number" id="inputOverrideGaDepth" step="0.5" class="w-14 text-center font-black text-slate-900 bg-white border border-slate-300 rounded-lg py-1 text-xs">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('gaDepth', 0.5)">＋</button>
+              <button type="button" class="p-1 text-slate-400 hover:text-pitch-700 text-xs" onclick="clearOverride('gaDepth')" title="比率自動計算に戻す">🔄</button>
+            </div>
+          </div>
+
+          <!-- 4. GA 横幅 -->
+          <div class="flex items-center justify-between py-0.5">
+            <div>
+              <span class="font-black text-slate-800 text-xs">▫️ GA 横幅</span>
+              <span class="text-[10px] text-slate-400 block" id="hintGaWidth">自動: 12.8m</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('gaWidth', -0.5)">−</button>
+              <input type="number" id="inputOverrideGaWidth" step="0.5" class="w-14 text-center font-black text-slate-900 bg-white border border-slate-300 rounded-lg py-1 text-xs">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('gaWidth', 0.5)">＋</button>
+              <button type="button" class="p-1 text-slate-400 hover:text-pitch-700 text-xs" onclick="clearOverride('gaWidth')" title="比率自動計算に戻す">🔄</button>
+            </div>
+          </div>
+
+          <!-- 5. PK マーク位置 -->
+          <div class="flex items-center justify-between py-0.5">
+            <div>
+              <span class="font-black text-slate-800 text-xs">🎯 PKマーク位置</span>
+              <span class="text-[10px] text-slate-400 block" id="hintPkDist">自動: 6.0m</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('pkDist', -0.5)">−</button>
+              <input type="number" id="inputOverridePkDist" step="0.5" class="w-14 text-center font-black text-slate-900 bg-white border border-slate-300 rounded-lg py-1 text-xs">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('pkDist', 0.5)">＋</button>
+              <button type="button" class="p-1 text-slate-400 hover:text-pitch-700 text-xs" onclick="clearOverride('pkDist')" title="比率自動計算に戻す">🔄</button>
+            </div>
+          </div>
+
+          <!-- 6. センターサークル半径 -->
+          <div class="flex items-center justify-between py-0.5">
+            <div>
+              <span class="font-black text-slate-800 text-xs">⭕ センターサークル半径</span>
+              <span class="text-[10px] text-slate-400 block" id="hintCircleRadius">自動: 5.8m</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('circleRadius', -0.5)">−</button>
+              <input type="number" id="inputOverrideCircleRadius" step="0.5" class="w-14 text-center font-black text-slate-900 bg-white border border-slate-300 rounded-lg py-1 text-xs">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('circleRadius', 0.5)">＋</button>
+              <button type="button" class="p-1 text-slate-400 hover:text-pitch-700 text-xs" onclick="clearOverride('circleRadius')" title="比率自動計算に戻す">🔄</button>
+            </div>
+          </div>
+
+          <!-- 7. ペナルティアーク半径 -->
+          <div class="flex items-center justify-between py-0.5">
+            <div>
+              <span class="font-black text-slate-800 text-xs">🌙 ペナルティアーク半径</span>
+              <span class="text-[10px] text-slate-400 block" id="hintPenaltyArcRadius">自動: 5.0m</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('penaltyArcRadius', -0.5)">−</button>
+              <input type="number" id="inputOverridePenaltyArcRadius" step="0.5" class="w-14 text-center font-black text-slate-900 bg-white border border-slate-300 rounded-lg py-1 text-xs">
+              <button type="button" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-black text-slate-700 flex items-center justify-center active:scale-95" onclick="adjustOverride('penaltyArcRadius', 0.5)">＋</button>
+              <button type="button" class="p-1 text-slate-400 hover:text-pitch-700 text-xs" onclick="clearOverride('penaltyArcRadius')" title="比率自動計算に戻す">🔄</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -530,6 +654,15 @@
       aspectLock: true, // 比率連動モード (デフォルト ON)
       aspectRatio: 32.0 / 50.0, // 縦に対する横の比率 (デフォルト 0.64)
       pythMultiplier: 4, // 3:4:5 の倍率 (デフォルト 4 = 12-16-20m)
+      customOverrides: {
+        paDepth: null,
+        paWidth: null,
+        gaDepth: null,
+        gaWidth: null,
+        pkDist: null,
+        circleRadius: null,
+        penaltyArcRadius: null
+      },
       currentTab: 'pitch', // 'pitch' | 'tape' | 'steps'
       tapeTarget: 'goal',  // 'goal' | 'touch'
       tapeReverse: false,
@@ -545,9 +678,42 @@
 
     /* プリセット定義 */
     const PRESETS = {
-      u8: { length: 50.0, width: 32.0, goalWidth: 5.0, name: 'U-8 ミニ (50×32m)' },
-      u10: { length: 60.0, width: 40.0, goalWidth: 5.0, name: 'U-10 標準 (60×40m)' },
-      official: { length: 68.0, width: 50.0, goalWidth: 5.0, name: '公式 8人制 (68×50m)' }
+      u8: { 
+        length: 50.0, 
+        width: 32.0, 
+        goalWidth: 5.0, 
+        name: 'U-8 比率 (50×32m)',
+        overrides: {} 
+      },
+      u8_genesis: { 
+        length: 50.0, 
+        width: 32.0, 
+        goalWidth: 5.0, 
+        name: 'U-8 GENESIS (50×32m)',
+        overrides: {
+          paDepth: 10.0,
+          paWidth: 21.0,
+          gaDepth: 4.0,
+          gaWidth: 13.0,
+          pkDist: 6.0,
+          circleRadius: 7.0,
+          penaltyArcRadius: 6.0
+        }
+      },
+      u10: { 
+        length: 60.0, 
+        width: 40.0, 
+        goalWidth: 5.0, 
+        name: 'U-10 標準 (60×40m)',
+        overrides: {} 
+      },
+      official: { 
+        length: 68.0, 
+        width: 50.0, 
+        goalWidth: 5.0, 
+        name: '公式 8人制 (68×50m)',
+        overrides: {} 
+      }
     };
 
     /* ピタゴラス数 3:4:5 テーブル */
@@ -580,33 +746,32 @@
       // 対角線
       const diagonal = Number(Math.hypot(len, wid).toFixed(2));
 
-      // ペナルティエリア (PA)
-      // 要件: 深さ 縦×0.16 / 横幅 横×0.65
-      let paDepth = isOfficial ? 12.0 : roundValue(len * 0.16);
-      let paWidth = isOfficial ? 32.0 : roundValue(wid * 0.65);
+      // 1. 基本の自動計算（比率基準）
+      let autoPaDepth = isOfficial ? 12.0 : roundValue(len * 0.16);
+      let autoPaWidth = isOfficial ? 32.0 : roundValue(wid * 0.65);
+      let autoGaDepth = isOfficial ? 4.0 : (len < 40.0 ? 3.0 : 4.0);
+      let autoGaWidth = isOfficial ? 16.0 : roundValue(wid * 0.40);
+      let autoPkDist = isOfficial ? 8.0 : roundValue(Math.min(Math.max(autoPaDepth * 0.75, 5.0), 8.0));
+      let autoCircleRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(wid * 0.18, 5.0), 7.0));
+      let autoPenaltyArcRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(autoCircleRadius * 0.85, 5.0), 6.0));
 
-      // ゴールエリア (GA)
-      // 要件: 深さ 4.0m (縦<40mは3.0m) / 横幅 横×0.40
-      let gaDepth = isOfficial ? 4.0 : (len < 40.0 ? 3.0 : 4.0);
-      let gaWidth = isOfficial ? 16.0 : roundValue(wid * 0.40);
-
-      // ペナルティマーク (PK)
-      // 要件: ゴールラインから PA深さ × 0.75 (公式8m目安、低学年5〜6m)
-      let pkDist = isOfficial ? 8.0 : roundValue(Math.min(Math.max(paDepth * 0.75, 5.0), 8.0));
-
-      // センターサークル半径
-      // 要件: 横 × 0.18 (最大7.0m、最小5.0m)
-      let circleRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(wid * 0.18, 5.0), 7.0));
-
-      // ペナルティアーク半径
-      // 要件: PKマークから半径5〜6m
-      let penaltyArcRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(circleRadius * 0.85, 5.0), 6.0));
+      // 2. 手動オーバーライドがあればそれを採用、なければ比率自動値を採用
+      const ov = state.customOverrides || {};
+      let paDepth = (ov.paDepth !== null && ov.paDepth !== undefined) ? ov.paDepth : autoPaDepth;
+      let paWidth = (ov.paWidth !== null && ov.paWidth !== undefined) ? ov.paWidth : autoPaWidth;
+      let gaDepth = (ov.gaDepth !== null && ov.gaDepth !== undefined) ? ov.gaDepth : autoGaDepth;
+      let gaWidth = (ov.gaWidth !== null && ov.gaWidth !== undefined) ? ov.gaWidth : autoGaWidth;
+      let pkDist = (ov.pkDist !== null && ov.pkDist !== undefined) ? ov.pkDist : autoPkDist;
+      let circleRadius = (ov.circleRadius !== null && ov.circleRadius !== undefined) ? ov.circleRadius : autoCircleRadius;
+      let penaltyArcRadius = (ov.penaltyArcRadius !== null && ov.penaltyArcRadius !== undefined) ? ov.penaltyArcRadius : autoPenaltyArcRadius;
 
       // コーナーアーク (公式1.0m)
       const cornerArcRadius = 1.0;
 
       // 直角出し 3:4:5
       const currentPyth = PYTHAGORAS_TABLE.find(p => p.k === state.pythMultiplier) || PYTHAGORAS_TABLE[3];
+
+      const hasOverrides = Object.values(ov).some(v => v !== null && v !== undefined);
 
       return {
         length: len,
@@ -621,7 +786,17 @@
         circleRadius,
         penaltyArcRadius,
         cornerArcRadius,
-        pyth: currentPyth
+        pyth: currentPyth,
+        autoValues: {
+          paDepth: autoPaDepth,
+          paWidth: autoPaWidth,
+          gaDepth: autoGaDepth,
+          gaWidth: autoGaWidth,
+          pkDist: autoPkDist,
+          circleRadius: autoCircleRadius,
+          penaltyArcRadius: autoPenaltyArcRadius
+        },
+        hasOverrides
       };
     }
 
@@ -671,11 +846,60 @@
       // アスペクト比バッジ & 連動ボタンスタイル更新
       updateAspectUI();
 
+      // 各エリアカスタム入力欄のUI更新
+      updateCustomAreaUI(data);
+
       // プリセットバッジ更新
       checkActivePreset();
 
       // ローカルストレージ保存
       saveSettings();
+    }
+
+    /* 各エリアカスタム入力欄のUI同期 */
+    function updateCustomAreaUI(data) {
+      const keys = ['paDepth', 'paWidth', 'gaDepth', 'gaWidth', 'pkDist', 'circleRadius', 'penaltyArcRadius'];
+      const capKeys = {
+        paDepth: 'PaDepth',
+        paWidth: 'PaWidth',
+        gaDepth: 'GaDepth',
+        gaWidth: 'GaWidth',
+        pkDist: 'PkDist',
+        circleRadius: 'CircleRadius',
+        penaltyArcRadius: 'PenaltyArcRadius'
+      };
+
+      const ov = state.customOverrides || {};
+
+      keys.forEach(k => {
+        const inputEl = document.getElementById(`inputOverride${capKeys[k]}`);
+        const hintEl = document.getElementById(`hint${capKeys[k]}`);
+        const autoVal = data.autoValues[k];
+        const currentVal = data[k];
+
+        if (inputEl) {
+          inputEl.value = currentVal.toFixed(1);
+          if (ov[k] !== null && ov[k] !== undefined) {
+            inputEl.classList.add('border-amber-400', 'bg-amber-50/50', 'text-amber-900');
+            inputEl.classList.remove('border-slate-300', 'bg-white');
+          } else {
+            inputEl.classList.remove('border-amber-400', 'bg-amber-50/50', 'text-amber-900');
+            inputEl.classList.add('border-slate-300', 'bg-white');
+          }
+        }
+        if (hintEl) {
+          hintEl.textContent = `自動: ${autoVal.toFixed(1)}m`;
+        }
+      });
+
+      const customBadge = document.getElementById('customAreaBadge');
+      if (customBadge) {
+        if (data.hasOverrides) {
+          customBadge.classList.remove('hidden');
+        } else {
+          customBadge.classList.add('hidden');
+        }
+      }
     }
 
     /* アスペクト比表示とロックボタンのUI更新 */
@@ -1323,11 +1547,104 @@
           state.width = p.width;
           state.goalWidth = p.goalWidth;
           state.aspectRatio = p.width / p.length;
+
+          // プリセット固有のオーバーライドを適用（未指定項目はnullクリア）
+          state.customOverrides = {
+            paDepth: null,
+            paWidth: null,
+            gaDepth: null,
+            gaWidth: null,
+            pkDist: null,
+            circleRadius: null,
+            penaltyArcRadius: null,
+            ...(p.overrides || {})
+          };
+
           document.getElementById('goalWidthSelect').value = p.goalWidth.toFixed(1);
           showToast(`プリセット「${p.name}」を適用しました`);
           updateAllUI();
         }
       });
+    });
+
+    /* ==========================================================================
+       各エリア寸法の個別カスタマイズ（手動オーバーライド）操作関数
+       ========================================================================== */
+    function adjustOverride(key, delta) {
+      const data = calculatePitchData();
+      const currentVal = data[key];
+      const newVal = Math.max(0.5, Number((currentVal + delta).toFixed(1)));
+      setOverride(key, newVal);
+    }
+
+    function setOverride(key, val) {
+      if (!state.customOverrides) state.customOverrides = {};
+      const num = parseFloat(val);
+      if (isNaN(num) || num <= 0) return;
+      state.customOverrides[key] = num;
+      updateAllUI();
+      saveSettings();
+    }
+
+    function clearOverride(key) {
+      if (state.customOverrides) {
+        state.customOverrides[key] = null;
+      }
+      updateAllUI();
+      saveSettings();
+      showToast('🔄 比率自動計算に戻しました');
+    }
+
+    function resetAllOverrides() {
+      state.customOverrides = {
+        paDepth: null,
+        paWidth: null,
+        gaDepth: null,
+        gaWidth: null,
+        pkDist: null,
+        circleRadius: null,
+        penaltyArcRadius: null
+      };
+      updateAllUI();
+      saveSettings();
+      showToast('✨ すべてのエリア寸法を比率自動計算に戻しました');
+    }
+
+    // カスタマイズアコーディオン開閉
+    document.getElementById('toggleCustomAreaBtn').addEventListener('click', () => {
+      const panel = document.getElementById('customAreaPanel');
+      const arrow = document.getElementById('customAreaArrow');
+      const isHidden = panel.classList.contains('hidden');
+      if (isHidden) {
+        panel.classList.remove('hidden');
+        arrow.textContent = '▲ 閉じる';
+      } else {
+        panel.classList.add('hidden');
+        arrow.textContent = '▼ 詳細変更';
+      }
+    });
+
+    // 全クリアボタン
+    document.getElementById('resetAllOverridesBtn').addEventListener('click', resetAllOverrides);
+
+    // 各オーバーライド数値入力ボックスの変更リスナー
+    const overrideInputs = [
+      { id: 'inputOverridePaDepth', key: 'paDepth' },
+      { id: 'inputOverridePaWidth', key: 'paWidth' },
+      { id: 'inputOverrideGaDepth', key: 'gaDepth' },
+      { id: 'inputOverrideGaWidth', key: 'gaWidth' },
+      { id: 'inputOverridePkDist', key: 'pkDist' },
+      { id: 'inputOverrideCircleRadius', key: 'circleRadius' },
+      { id: 'inputOverridePenaltyArcRadius', key: 'penaltyArcRadius' }
+    ];
+
+    overrideInputs.forEach(item => {
+      const el = document.getElementById(item.id);
+      if (el) {
+        el.addEventListener('change', (e) => {
+          setOverride(item.key, e.target.value);
+        });
+      }
     });
 
     // ピタゴラス数プルダウン初期化
@@ -1538,6 +1855,7 @@
           roundStep: state.roundStep,
           aspectLock: state.aspectLock,
           aspectRatio: state.aspectRatio,
+          customOverrides: state.customOverrides,
           pythMultiplier: state.pythMultiplier,
           sunMode: state.sunMode,
           tapeChecks: state.tapeChecks,
@@ -1558,6 +1876,7 @@
           if (loaded.roundStep) state.roundStep = loaded.roundStep;
           if (loaded.aspectLock !== undefined) state.aspectLock = loaded.aspectLock;
           if (loaded.aspectRatio) state.aspectRatio = loaded.aspectRatio;
+          if (loaded.customOverrides) state.customOverrides = loaded.customOverrides;
           if (loaded.pythMultiplier) state.pythMultiplier = loaded.pythMultiplier;
           if (loaded.tapeChecks) state.tapeChecks = loaded.tapeChecks;
           if (loaded.stepChecks) state.stepChecks = loaded.stepChecks;
