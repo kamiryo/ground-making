@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>グランドメイキング | 少年サッカー・8人制コート設営現場支援ツール</title>
-  <meta name="description" content="小学校校庭や河川敷など限られたスペースに合わせた少年サッカー（8人制・U-8・U-10）コート設営支援ツール「グランドメイキング」。寸法自動計算、メジャー目盛り表、3:4:5直角出し、動的手順書を完備。">
+  <title>グランドメイキング | 少年サッカー・8人制ピッチ設営現場支援ツール</title>
+  <meta name="description" content="小学校校庭や河川敷など限られたスペースに合わせた少年サッカー（8人制・U-8・U-10）ピッチ設営支援ツール「グランドメイキング」。寸法自動計算、メジャー目盛り表、3:4:5直角出し、動的手順書を完備。">
   <!-- PWA & Mobile Web App Meta -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -94,7 +94,7 @@
       outline: 2px solid #000000;
     }
 
-    /* 印刷スタイル（A4用紙にコート図・目盛り表・手順書を綺麗に印刷） */
+    /* 印刷スタイル（A4用紙にピッチ図・目盛り表・手順書を綺麗に印刷） */
     @media print {
       .no-print { display: none !important; }
       body {
@@ -200,7 +200,7 @@
       </div>
     </section>
 
-    <!-- 2. コート寸法 入力パネル -->
+    <!-- 2. ピッチ寸法 入力パネル -->
     <section class="sun-card bg-white rounded-xl p-3.5 shadow-sm border border-slate-200 space-y-3">
       <!-- 比率連動コントロール & アスペクト比表示 -->
       <div class="flex items-center justify-between pb-2 border-b border-slate-100 text-xs">
@@ -222,7 +222,7 @@
         <div class="flex justify-between items-baseline mb-1">
           <label for="lengthNumberInput" class="text-xs font-bold text-slate-700 flex items-center">
             <span class="w-2.5 h-2.5 rounded-full bg-blue-600 mr-1.5 inline-block"></span>
-            コート縦（タッチライン長）
+            ピッチ縦（タッチライン長）
           </label>
           <div class="flex items-center space-x-1">
             <input type="number" id="lengthNumberInput" min="30" max="75" step="0.5" value="68.0" class="w-20 text-right text-2xl font-black text-slate-900 tracking-tight bg-slate-50 border border-slate-300 rounded px-1 py-0.5 focus:bg-white focus:ring-2 focus:ring-pitch-500 outline-none">
@@ -246,7 +246,7 @@
         <div class="flex justify-between items-baseline mb-1">
           <label for="widthNumberInput" class="text-xs font-bold text-slate-700 flex items-center">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 mr-1.5 inline-block"></span>
-            コート横（ゴールライン幅）
+            ピッチ横（ゴールライン幅）
           </label>
           <div class="flex items-center space-x-1">
             <input type="number" id="widthNumberInput" min="20" max="55" step="0.5" value="50.0" class="w-20 text-right text-2xl font-black text-slate-900 tracking-tight bg-slate-50 border border-slate-300 rounded px-1 py-0.5 focus:bg-white focus:ring-2 focus:ring-pitch-500 outline-none">
@@ -298,11 +298,11 @@
 
         <!-- 展開パネル -->
         <div id="customAreaPanel" class="mt-2 space-y-2.5 p-3 bg-slate-50 border border-slate-200 rounded-xl hidden text-xs">
-          <!-- コート連動 ON/OFF スイッチ -->
+          <!-- ピッチ連動 ON/OFF スイッチ -->
           <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
             <div>
               <div class="flex items-center space-x-1.5 font-bold text-xs text-slate-800">
-                <span>コート連動</span>
+                <span>ピッチ連動</span>
                 <span id="areaLinkBadge" class="text-[9px] px-1.5 py-0.2 rounded font-extrabold bg-slate-100 text-slate-600 border border-slate-300">OFF (寸法固定)</span>
               </div>
               <span class="text-[10px] text-slate-400 block" id="areaLinkSubText">縦横を変えてもエリア寸法は固定</span>
@@ -431,7 +431,7 @@
     <nav class="sun-card bg-slate-200 p-1 rounded-xl grid grid-cols-3 gap-1 text-center font-bold text-xs select-none no-print">
       <button type="button" id="tabBtnPitch" class="tab-btn py-2 px-1 rounded-lg bg-white text-pitch-800 shadow-sm transition flex flex-col items-center justify-center space-y-0.5">
         <span class="text-base">📐</span>
-        <span class="text-[11px]">コート図面</span>
+        <span class="text-[11px]">ピッチ図面</span>
       </button>
       <button type="button" id="tabBtnTape" class="tab-btn py-2 px-1 rounded-lg text-slate-600 hover:text-slate-900 transition flex flex-col items-center justify-center space-y-0.5">
         <span class="text-base">📏</span>
@@ -443,9 +443,9 @@
       </button>
     </nav>
 
-    <!-- ==================== タブ 1: コート図面 & 寸法サマリー ==================== -->
+    <!-- ==================== タブ 1: ピッチ図面 & 寸法サマリー ==================== -->
     <div id="tabContentPitch" class="space-y-3">
-      <!-- リアルタイム縮尺連動SVGコート図 -->
+      <!-- リアルタイム縮尺連動SVGピッチ図 -->
       <section class="sun-card bg-white rounded-xl p-3 shadow-sm border border-slate-200">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center space-x-1.5">
@@ -697,7 +697,7 @@
       roundStep: 0.1,
       aspectLock: true, // 比率連動モード (デフォルト ON)
       aspectRatio: 50.0 / 68.0, // 縦に対する横の比率 (デフォルト 公式8人制: 50/68)
-      areaAutoLink: false, // コートサイズ連動 (デフォルト OFF: 寸法固定)
+      areaAutoLink: false, // ピッチサイズ連動 (デフォルト OFF: 寸法固定)
       areaBase: {
         paDepth: 12.0,
         paWidth: 32.0,
@@ -837,7 +837,7 @@
       // 対角線
       const diagonal = Number(Math.hypot(len, wid).toFixed(2));
 
-      // 1. 比率自動計算値（コートサイズ連動用）
+      // 1. 比率自動計算値（ピッチサイズ連動用）
       let ratioPaDepth = isOfficial ? 12.0 : roundValue(len * 0.16);
       let ratioPaWidth = isOfficial ? 32.0 : roundValue(wid * 0.65);
       let ratioGaDepth = isOfficial ? 4.0 : (len < 40.0 ? 3.0 : 4.0);
@@ -1020,7 +1020,7 @@
         }
         if (areaLinkIcon) areaLinkIcon.textContent = '🔄';
         if (areaLinkBtnText) areaLinkBtnText.textContent = '連動ON';
-        if (noticeEl) noticeEl.textContent = '※コート比率に連動して自動計算中（＋−で個別に変更も可能）';
+        if (noticeEl) noticeEl.textContent = '※ピッチ比率に連動して自動計算中（＋−で個別に変更も可能）';
         if (resetBtnText) resetBtnText.textContent = '✨ 全て自動に戻す';
       } else {
         if (headerBadge) {
@@ -1711,7 +1711,7 @@
           desc: `まず、基準となる長辺（タッチライン）を真っ直ぐ1本張ります。`,
           key: "step_1",
           details: [
-            `コートの片側端に「コーナー起点 A（目印）」を決め、メジャーを伸ばして <strong>${data.length.toFixed(1)}m</strong> の位置に「コーナー B（目印）」を置きます（※目印はコーン・石灰・小石などでOK）。`,
+            `ピッチの片側端に「コーナー起点 A（目印）」を決め、メジャーを伸ばして <strong>${data.length.toFixed(1)}m</strong> の位置に「コーナー B（目印）」を置きます（※目印はコーン・石灰・小石などでOK）。`,
             `メジャーの <strong>${(data.length / 2).toFixed(1)}m</strong> 地点に「中央目印（センター）」をつけます。`,
             `コーナーAから <strong>${pyth.b.toFixed(1)}m</strong> の地点に「直角出し用の基準目印 P」をつけます（STEP 2で使用）。`
           ],
@@ -2098,13 +2098,13 @@
       showToast(state.areaAutoLink ? '✨ すべてのエリア寸法を比率自動計算に戻しました' : '✨ すべてのエリア寸法を基準値に戻しました');
     }
 
-    // コート連動 ON/OFF 切替
+    // ピッチ連動 ON/OFF 切替
     const toggleAreaLinkBtn = document.getElementById('toggleAreaLinkBtn');
     if (toggleAreaLinkBtn) {
       toggleAreaLinkBtn.addEventListener('click', () => {
         state.areaAutoLink = !state.areaAutoLink;
         if (state.areaAutoLink) {
-          showToast('🔄 コート連動を【ON】にしました（外枠比率で自動追従）');
+          showToast('🔄 ピッチ連動を【ON】にしました（外枠比率で自動追従）');
         } else {
           // OFFにする際、現在の寸法を固定ベース寸法に記録
           const data = calculatePitchData();
@@ -2117,7 +2117,7 @@
             circleRadius: data.circleRadius,
             penaltyArcRadius: data.penaltyArcRadius
           };
-          showToast('🔒 コート連動を【OFF】にしました（現在の寸法で固定）');
+          showToast('🔒 ピッチ連動を【OFF】にしました（現在の寸法で固定）');
         }
         updateAllUI();
       });
@@ -2277,7 +2277,7 @@
        ========================================================================== */
     function resetAllSettings(skipConfirm = false) {
       if (!skipConfirm) {
-        const ok = confirm('コート寸法やカスタム設定をすべて初期状態（公式8人制: 68×50m）にリセットしますか？\n※現在の変更内容はすべて消去されます。');
+        const ok = confirm('ピッチ寸法やカスタム設定をすべて初期状態（公式8人制: 68×50m）にリセットしますか？\n※現在の変更内容はすべて消去されます。');
         if (!ok) return;
       }
 
@@ -2289,7 +2289,7 @@
       state.aspectLock = true;
       state.aspectRatio = 50.0 / 68.0;
 
-      // 2. コートサイズ連動 & エリアベース寸法 (公式8人制)
+      // 2. ピッチサイズ連動 & エリアベース寸法 (公式8人制)
       state.areaAutoLink = false;
       state.areaBase = {
         paDepth: 12.0,
@@ -2358,7 +2358,7 @@
         if (customArrow) customArrow.textContent = '▼ 詳細変更';
       }
 
-      // 11. タブをコート図面に戻す
+      // 11. タブをピッチ図面に戻す
       switchTab('pitch');
 
       // 12. 全UIの再計算・再描画
@@ -2432,7 +2432,7 @@
       const shareUrl = getShareableURL();
       const text = [
         `【⚽ グランドメイキング 設営寸法メモ】`,
-        `■ コートサイズ: 縦${data.length.toFixed(1)}m × 横${data.width.toFixed(1)}m (ゴール幅${data.goalWidth.toFixed(1)}m)`,
+        `■ ピッチサイズ: 縦${data.length.toFixed(1)}m × 横${data.width.toFixed(1)}m (ゴール幅${data.goalWidth.toFixed(1)}m)`,
         `・対角線: ${data.diagonal.toFixed(2)}m (四隅の歪みチェック)`,
         `・直角出し(3:4:5): ${data.pyth.a}m - ${data.pyth.b}m - ${data.pyth.c}m`,
         `・PA(深さ×幅): ${data.paDepth.toFixed(1)}m × ${data.paWidth.toFixed(1)}m`,
@@ -2654,7 +2654,7 @@
           }
         }
 
-        // 5. コートサイズ連動フラグ
+        // 5. ピッチサイズ連動フラグ
         const linkParam = params.get('link');
         if (linkParam === '1' || linkParam === 'true') {
           state.areaAutoLink = true;
