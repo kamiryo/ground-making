@@ -275,9 +275,10 @@
       <!-- ⚙️ 各エリア寸法の個別カスタマイズ（オプション展開パネル） -->
       <div class="pt-2 border-t border-slate-100">
         <button type="button" id="toggleCustomAreaBtn" class="w-full flex items-center justify-between py-2 px-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-700 text-xs font-bold transition border border-slate-200 active:scale-95">
-          <span class="flex items-center space-x-1.5">
+          <span class="flex items-center space-x-1.5 flex-wrap">
             <span class="text-pitch-600">⚙️</span>
             <span>各エリア寸法の個別カスタマイズ (7項目)</span>
+            <span id="areaLinkHeaderBadge" class="text-[9px] bg-slate-100 text-slate-600 border border-slate-300 px-1.5 py-0.2 rounded font-bold">連動OFF</span>
             <span id="customAreaBadge" class="hidden text-[9px] bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded font-extrabold">カスタム中</span>
           </span>
           <span id="customAreaArrow" class="text-slate-400 text-[10px] font-semibold">▼ 詳細変更</span>
@@ -285,15 +286,30 @@
 
         <!-- 展開パネル -->
         <div id="customAreaPanel" class="mt-2 space-y-2.5 p-3 bg-slate-50 border border-slate-200 rounded-xl hidden text-xs">
+          <!-- コート連動 ON/OFF スイッチ -->
+          <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
+            <div>
+              <div class="flex items-center space-x-1.5 font-bold text-xs text-slate-800">
+                <span>コート連動</span>
+                <span id="areaLinkBadge" class="text-[9px] px-1.5 py-0.2 rounded font-extrabold bg-slate-100 text-slate-600 border border-slate-300">OFF (寸法固定)</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block" id="areaLinkSubText">縦横を変えてもエリア寸法は固定</span>
+            </div>
+            <button type="button" id="toggleAreaLinkBtn" class="py-1 px-2.5 rounded-lg border font-bold text-xs flex items-center space-x-1 transition active:scale-95 bg-slate-100 border-slate-300 text-slate-600 flex-shrink-0">
+              <span id="areaLinkIcon">🔒</span>
+              <span id="areaLinkBtnText">連動OFF</span>
+            </button>
+          </div>
+
           <div class="flex items-center justify-between pb-1.5 border-b border-slate-200 text-[10px] text-slate-500">
-            <span>※変更した項目だけ上書き（他は比率維持）</span>
+            <span id="customAreaNotice">※各項目を手動で変更可能（＋−ボタン）</span>
             <div class="flex items-center space-x-1">
               <button type="button" id="shareCustomUrlBtn" class="text-amber-800 bg-amber-100 hover:bg-amber-200 font-bold px-2 py-0.5 rounded border border-amber-300 active:scale-95 flex items-center space-x-0.5" title="このカスタム寸法をURLで共有">
                 <span>🔗</span>
                 <span>共有URL</span>
               </button>
               <button type="button" id="resetAllOverridesBtn" class="text-pitch-700 hover:text-pitch-900 font-bold bg-white px-2 py-0.5 rounded border border-slate-300 active:scale-95">
-                ✨ 全て自動に戻す
+                <span id="resetAllOverridesBtnText">✨ 基準値に戻す</span>
               </button>
             </div>
           </div>
@@ -669,6 +685,16 @@
       roundStep: 0.1,
       aspectLock: true, // 比率連動モード (デフォルト ON)
       aspectRatio: 32.0 / 50.0, // 縦に対する横の比率 (デフォルト 0.64)
+      areaAutoLink: false, // コートサイズ連動 (デフォルト OFF: 寸法固定)
+      areaBase: {
+        paDepth: 8.0,
+        paWidth: 20.8,
+        gaDepth: 4.0,
+        gaWidth: 12.8,
+        pkDist: 6.0,
+        circleRadius: 5.8,
+        penaltyArcRadius: 5.0
+      },
       pythMultiplier: 4, // 3:4:5 の倍率 (デフォルト 4 = 12-16-20m)
       customOverrides: {
         paDepth: null,
@@ -700,6 +726,15 @@
         width: 32.0, 
         goalWidth: 5.0, 
         name: 'U-8 比率 (50×32m)',
+        baseDimensions: {
+          paDepth: 8.0,
+          paWidth: 20.8,
+          gaDepth: 4.0,
+          gaWidth: 12.8,
+          pkDist: 6.0,
+          circleRadius: 5.8,
+          penaltyArcRadius: 5.0
+        },
         overrides: {} 
       },
       u8_genesis: { 
@@ -707,6 +742,15 @@
         width: 32.0, 
         goalWidth: 5.0, 
         name: 'U-8 GENESIS (50×32m)',
+        baseDimensions: {
+          paDepth: 10.0,
+          paWidth: 21.0,
+          gaDepth: 4.0,
+          gaWidth: 13.0,
+          pkDist: 6.0,
+          circleRadius: 7.0,
+          penaltyArcRadius: 6.0
+        },
         overrides: {
           paDepth: 10.0,
           paWidth: 21.0,
@@ -722,6 +766,15 @@
         width: 40.0, 
         goalWidth: 5.0, 
         name: 'U-10 標準 (60×40m)',
+        baseDimensions: {
+          paDepth: 9.6,
+          paWidth: 26.0,
+          gaDepth: 4.0,
+          gaWidth: 16.0,
+          pkDist: 7.0,
+          circleRadius: 7.0,
+          penaltyArcRadius: 6.0
+        },
         overrides: {} 
       },
       official: { 
@@ -729,6 +782,15 @@
         width: 50.0, 
         goalWidth: 5.0, 
         name: '公式 8人制 (68×50m)',
+        baseDimensions: {
+          paDepth: 12.0,
+          paWidth: 32.0,
+          gaDepth: 4.0,
+          gaWidth: 16.0,
+          pkDist: 8.0,
+          circleRadius: 7.0,
+          penaltyArcRadius: 7.0
+        },
         overrides: {} 
       }
     };
@@ -763,24 +825,37 @@
       // 対角線
       const diagonal = Number(Math.hypot(len, wid).toFixed(2));
 
-      // 1. 基本の自動計算（比率基準）
-      let autoPaDepth = isOfficial ? 12.0 : roundValue(len * 0.16);
-      let autoPaWidth = isOfficial ? 32.0 : roundValue(wid * 0.65);
-      let autoGaDepth = isOfficial ? 4.0 : (len < 40.0 ? 3.0 : 4.0);
-      let autoGaWidth = isOfficial ? 16.0 : roundValue(wid * 0.40);
-      let autoPkDist = isOfficial ? 8.0 : roundValue(Math.min(Math.max(autoPaDepth * 0.75, 5.0), 8.0));
-      let autoCircleRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(wid * 0.18, 5.0), 7.0));
-      let autoPenaltyArcRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(autoCircleRadius * 0.85, 5.0), 6.0));
+      // 1. 比率自動計算値（コートサイズ連動用）
+      let ratioPaDepth = isOfficial ? 12.0 : roundValue(len * 0.16);
+      let ratioPaWidth = isOfficial ? 32.0 : roundValue(wid * 0.65);
+      let ratioGaDepth = isOfficial ? 4.0 : (len < 40.0 ? 3.0 : 4.0);
+      let ratioGaWidth = isOfficial ? 16.0 : roundValue(wid * 0.40);
+      let ratioPkDist = isOfficial ? 8.0 : roundValue(Math.min(Math.max(ratioPaDepth * 0.75, 5.0), 8.0));
+      let ratioCircleRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(wid * 0.18, 5.0), 7.0));
+      let ratioPenaltyArcRadius = isOfficial ? 7.0 : roundValue(Math.min(Math.max(ratioCircleRadius * 0.85, 5.0), 6.0));
 
-      // 2. 手動オーバーライドがあればそれを採用、なければ比率自動値を採用
+      const ratioValues = {
+        paDepth: ratioPaDepth,
+        paWidth: ratioPaWidth,
+        gaDepth: ratioGaDepth,
+        gaWidth: ratioGaWidth,
+        pkDist: ratioPkDist,
+        circleRadius: ratioCircleRadius,
+        penaltyArcRadius: ratioPenaltyArcRadius
+      };
+
+      // 基準値の決定: 連動ONなら比率自動計算値、連動OFFなら固定寸法(state.areaBase)
+      const baseVals = state.areaAutoLink ? ratioValues : (state.areaBase || ratioValues);
+
+      // 2. 手動オーバーライドがあればそれを採用、なければ基準値を採用
       const ov = state.customOverrides || {};
-      let paDepth = (ov.paDepth !== null && ov.paDepth !== undefined) ? ov.paDepth : autoPaDepth;
-      let paWidth = (ov.paWidth !== null && ov.paWidth !== undefined) ? ov.paWidth : autoPaWidth;
-      let gaDepth = (ov.gaDepth !== null && ov.gaDepth !== undefined) ? ov.gaDepth : autoGaDepth;
-      let gaWidth = (ov.gaWidth !== null && ov.gaWidth !== undefined) ? ov.gaWidth : autoGaWidth;
-      let pkDist = (ov.pkDist !== null && ov.pkDist !== undefined) ? ov.pkDist : autoPkDist;
-      let circleRadius = (ov.circleRadius !== null && ov.circleRadius !== undefined) ? ov.circleRadius : autoCircleRadius;
-      let penaltyArcRadius = (ov.penaltyArcRadius !== null && ov.penaltyArcRadius !== undefined) ? ov.penaltyArcRadius : autoPenaltyArcRadius;
+      let paDepth = (ov.paDepth !== null && ov.paDepth !== undefined) ? ov.paDepth : (baseVals.paDepth !== undefined ? baseVals.paDepth : ratioValues.paDepth);
+      let paWidth = (ov.paWidth !== null && ov.paWidth !== undefined) ? ov.paWidth : (baseVals.paWidth !== undefined ? baseVals.paWidth : ratioValues.paWidth);
+      let gaDepth = (ov.gaDepth !== null && ov.gaDepth !== undefined) ? ov.gaDepth : (baseVals.gaDepth !== undefined ? baseVals.gaDepth : ratioValues.gaDepth);
+      let gaWidth = (ov.gaWidth !== null && ov.gaWidth !== undefined) ? ov.gaWidth : (baseVals.gaWidth !== undefined ? baseVals.gaWidth : ratioValues.gaWidth);
+      let pkDist = (ov.pkDist !== null && ov.pkDist !== undefined) ? ov.pkDist : (baseVals.pkDist !== undefined ? baseVals.pkDist : ratioValues.pkDist);
+      let circleRadius = (ov.circleRadius !== null && ov.circleRadius !== undefined) ? ov.circleRadius : (baseVals.circleRadius !== undefined ? baseVals.circleRadius : ratioValues.circleRadius);
+      let penaltyArcRadius = (ov.penaltyArcRadius !== null && ov.penaltyArcRadius !== undefined) ? ov.penaltyArcRadius : (baseVals.penaltyArcRadius !== undefined ? baseVals.penaltyArcRadius : ratioValues.penaltyArcRadius);
 
       // コーナーアーク (公式1.0m)
       const cornerArcRadius = 1.0;
@@ -804,15 +879,9 @@
         penaltyArcRadius,
         cornerArcRadius,
         pyth: currentPyth,
-        autoValues: {
-          paDepth: autoPaDepth,
-          paWidth: autoPaWidth,
-          gaDepth: autoGaDepth,
-          gaWidth: autoGaWidth,
-          pkDist: autoPkDist,
-          circleRadius: autoCircleRadius,
-          penaltyArcRadius: autoPenaltyArcRadius
-        },
+        areaAutoLink: state.areaAutoLink,
+        autoValues: baseVals,
+        ratioValues,
         hasOverrides
       };
     }
@@ -909,9 +978,56 @@
           }
         }
         if (hintEl) {
-          hintEl.textContent = `自動: ${autoVal.toFixed(1)}m`;
+          const prefix = state.areaAutoLink ? '自動' : '基準';
+          hintEl.textContent = `${prefix}: ${autoVal.toFixed(1)}m`;
         }
       });
+
+      // 連動バッジ＆ボタンのUI同期
+      const headerBadge = document.getElementById('areaLinkHeaderBadge');
+      const areaLinkBadge = document.getElementById('areaLinkBadge');
+      const areaLinkSubText = document.getElementById('areaLinkSubText');
+      const toggleLinkBtn = document.getElementById('toggleAreaLinkBtn');
+      const areaLinkIcon = document.getElementById('areaLinkIcon');
+      const areaLinkBtnText = document.getElementById('areaLinkBtnText');
+      const noticeEl = document.getElementById('customAreaNotice');
+      const resetBtnText = document.getElementById('resetAllOverridesBtnText');
+
+      if (state.areaAutoLink) {
+        if (headerBadge) {
+          headerBadge.textContent = '連動ON';
+          headerBadge.className = 'text-[9px] bg-pitch-50 text-pitch-800 border border-pitch-400 px-1.5 py-0.2 rounded font-bold';
+        }
+        if (areaLinkBadge) {
+          areaLinkBadge.textContent = 'ON (比率連動)';
+          areaLinkBadge.className = 'text-[9px] px-1.5 py-0.2 rounded font-extrabold bg-pitch-50 text-pitch-800 border border-pitch-400';
+        }
+        if (areaLinkSubText) areaLinkSubText.textContent = '縦横比率に合わせてエリア寸法も自動追従';
+        if (toggleLinkBtn) {
+          toggleLinkBtn.className = 'py-1 px-2.5 rounded-lg border font-bold text-xs flex items-center space-x-1 transition active:scale-95 bg-pitch-50 border-pitch-400 text-pitch-800 shadow-sm flex-shrink-0';
+        }
+        if (areaLinkIcon) areaLinkIcon.textContent = '🔄';
+        if (areaLinkBtnText) areaLinkBtnText.textContent = '連動ON';
+        if (noticeEl) noticeEl.textContent = '※比率自動計算中（手動オーバーライドも可）';
+        if (resetBtnText) resetBtnText.textContent = '✨ 全て自動に戻す';
+      } else {
+        if (headerBadge) {
+          headerBadge.textContent = '連動OFF';
+          headerBadge.className = 'text-[9px] bg-slate-100 text-slate-600 border border-slate-300 px-1.5 py-0.2 rounded font-bold';
+        }
+        if (areaLinkBadge) {
+          areaLinkBadge.textContent = 'OFF (寸法固定)';
+          areaLinkBadge.className = 'text-[9px] px-1.5 py-0.2 rounded font-extrabold bg-slate-100 text-slate-600 border border-slate-300';
+        }
+        if (areaLinkSubText) areaLinkSubText.textContent = '縦横を変えてもエリア寸法は固定（推奨）';
+        if (toggleLinkBtn) {
+          toggleLinkBtn.className = 'py-1 px-2.5 rounded-lg border font-bold text-xs flex items-center space-x-1 transition active:scale-95 bg-slate-100 border-slate-300 text-slate-600 flex-shrink-0';
+        }
+        if (areaLinkIcon) areaLinkIcon.textContent = '🔒';
+        if (areaLinkBtnText) areaLinkBtnText.textContent = '連動OFF';
+        if (noticeEl) noticeEl.textContent = '※寸法固定中（＋−ボタンで手動微調整可）';
+        if (resetBtnText) resetBtnText.textContent = '✨ 基準値に戻す';
+      }
 
       const customBadge = document.getElementById('customAreaBadge');
       if (customBadge) {
@@ -1872,6 +1988,11 @@
           state.goalWidth = p.goalWidth;
           state.aspectRatio = p.width / p.length;
 
+          // プリセット固有のベース寸法を保存（連動OFF時の基準値）
+          if (p.baseDimensions) {
+            state.areaBase = { ...p.baseDimensions };
+          }
+
           // プリセット固有のオーバーライドを適用（未指定項目はnullクリア）
           state.customOverrides = {
             paDepth: null,
@@ -1925,7 +2046,7 @@
       }
       updateAllUI();
       saveSettings();
-      showToast('🔄 比率自動計算に戻しました');
+      showToast(state.areaAutoLink ? '🔄 比率自動計算に戻しました' : '🔄 基準値に戻しました');
     }
 
     function resetAllOverrides() {
@@ -1940,7 +2061,32 @@
       };
       updateAllUI();
       saveSettings();
-      showToast('✨ すべてのエリア寸法を比率自動計算に戻しました');
+      showToast(state.areaAutoLink ? '✨ すべてのエリア寸法を比率自動計算に戻しました' : '✨ すべてのエリア寸法を基準値に戻しました');
+    }
+
+    // コート連動 ON/OFF 切替
+    const toggleAreaLinkBtn = document.getElementById('toggleAreaLinkBtn');
+    if (toggleAreaLinkBtn) {
+      toggleAreaLinkBtn.addEventListener('click', () => {
+        state.areaAutoLink = !state.areaAutoLink;
+        if (state.areaAutoLink) {
+          showToast('🔄 コート連動を【ON】にしました（外枠比率で自動追従）');
+        } else {
+          // OFFにする際、現在の寸法を固定ベース寸法に記録
+          const data = calculatePitchData();
+          state.areaBase = {
+            paDepth: data.paDepth,
+            paWidth: data.paWidth,
+            gaDepth: data.gaDepth,
+            gaWidth: data.gaWidth,
+            pkDist: data.pkDist,
+            circleRadius: data.circleRadius,
+            penaltyArcRadius: data.penaltyArcRadius
+          };
+          showToast('🔒 コート連動を【OFF】にしました（現在の寸法で固定）');
+        }
+        updateAllUI();
+      });
     }
 
     // カスタマイズアコーディオン開閉
@@ -2270,6 +2416,10 @@
         url.searchParams.set('ori', 'p');
       }
 
+      if (state.areaAutoLink) {
+        url.searchParams.set('link', '1');
+      }
+
       return url.toString();
     }
 
@@ -2300,6 +2450,9 @@
           state.width = p.width;
           state.goalWidth = p.goalWidth;
           state.aspectRatio = p.width / p.length;
+          if (p.baseDimensions) {
+            state.areaBase = { ...p.baseDimensions };
+          }
           state.customOverrides = {
             paDepth: null,
             paWidth: null,
@@ -2361,7 +2514,17 @@
           }
         }
 
-        // 5. 向き
+        // 5. コートサイズ連動フラグ
+        const linkParam = params.get('link');
+        if (linkParam === '1' || linkParam === 'true') {
+          state.areaAutoLink = true;
+          loaded = true;
+        } else if (linkParam === '0' || linkParam === 'false') {
+          state.areaAutoLink = false;
+          loaded = true;
+        }
+
+        // 6. 向き
         const ori = params.get('ori') || params.get('orientation');
         if (ori === 'p' || ori === 'portrait') {
           state.svgOrientation = 'portrait';
@@ -2373,7 +2536,7 @@
           if (oriLabel) oriLabel.textContent = '縦向き表示';
         }
 
-        // 6. 目盛り表示
+        // 7. 目盛り表示
         const marks = params.get('marks');
         if (marks === '0' || marks === 'false') {
           state.showPitchMarks = false;
@@ -2402,6 +2565,8 @@
           roundStep: state.roundStep,
           aspectLock: state.aspectLock,
           aspectRatio: state.aspectRatio,
+          areaAutoLink: state.areaAutoLink,
+          areaBase: state.areaBase,
           customOverrides: state.customOverrides,
           pythMultiplier: state.pythMultiplier,
           showPitchMarks: state.showPitchMarks,
@@ -2424,6 +2589,8 @@
           if (loaded.roundStep) state.roundStep = loaded.roundStep;
           if (loaded.aspectLock !== undefined) state.aspectLock = loaded.aspectLock;
           if (loaded.aspectRatio) state.aspectRatio = loaded.aspectRatio;
+          if (loaded.areaAutoLink !== undefined) state.areaAutoLink = loaded.areaAutoLink;
+          if (loaded.areaBase) state.areaBase = loaded.areaBase;
           if (loaded.customOverrides) state.customOverrides = loaded.customOverrides;
           if (loaded.pythMultiplier) state.pythMultiplier = loaded.pythMultiplier;
           if (loaded.tapeChecks) state.tapeChecks = loaded.tapeChecks;
