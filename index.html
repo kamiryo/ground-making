@@ -314,7 +314,7 @@
           </div>
 
           <div class="flex items-center justify-between pb-1.5 border-b border-slate-200 text-[10px] text-slate-500">
-            <span id="customAreaNotice">※各項目を手動で変更可能（＋−ボタン）</span>
+            <span id="customAreaNotice">※寸法固定中（＋−ボタンで手動微調整可）</span>
             <div class="flex items-center space-x-1">
               <button type="button" id="shareCustomUrlBtn" class="text-amber-800 bg-amber-100 hover:bg-amber-200 font-bold px-2 py-0.5 rounded border border-amber-300 active:scale-95 flex items-center space-x-0.5" title="このカスタム寸法をURLで共有">
                 <span>🔗</span>
@@ -1020,7 +1020,7 @@
         }
         if (areaLinkIcon) areaLinkIcon.textContent = '🔄';
         if (areaLinkBtnText) areaLinkBtnText.textContent = '連動ON';
-        if (noticeEl) noticeEl.textContent = '※比率自動計算中（手動オーバーライドも可）';
+        if (noticeEl) noticeEl.textContent = '※コート比率に連動して自動計算中（＋−で個別に変更も可能）';
         if (resetBtnText) resetBtnText.textContent = '✨ 全て自動に戻す';
       } else {
         if (headerBadge) {
