@@ -546,10 +546,10 @@
       <!-- 現場向け案内バナー -->
       <div class="sun-card bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-amber-900 text-xs">
         <p class="font-bold flex items-center">
-          <span class="text-base mr-1">💡</span>現場設営の最速テクニック
+          <span class="text-base mr-1">💡</span>最速設営のテクニック（ペグ・杭がなくてもOK！）
         </p>
         <p class="mt-1 text-[11px] text-amber-800 leading-relaxed">
-          メジャーの<strong>「0m金具」をコーナーペグに固定</strong>し、反対コーナーまで一直線にピンと張ってから、<strong>下記の累計目盛り位置に順にペグ（印）を打つ</strong>と一切の手戻りなく1回で完了します。
+          メジャーの<strong>「0m」をコーナー（角）で足で踏むなどして固定</strong>し、反対コーナーまで一直線にピンと張ってから、<strong>下記の累計目盛り位置に順に目印（石灰の粉・コーン・足跡など）をつける</strong>と一切の手戻りなく1回で完了します。
         </p>
       </div>
 
@@ -1582,9 +1582,9 @@
           desc: `まず、基準となる長辺（タッチライン）を真っ直ぐ1本張ります。`,
           key: "step_1",
           details: [
-            `コートの片側端に「コーナーペグ A」を打ち、メジャーを伸ばして <strong>${data.length.toFixed(1)}m</strong> の位置に「コーナーペグ B」を打ちます。`,
-            `メジャーの <strong>${(data.length / 2).toFixed(1)}m</strong> 地点に「センターペグ」を打ちます。`,
-            `コーナーAから <strong>${pyth.b.toFixed(1)}m</strong> の地点に「直角出し用ペグ P」を打ちます（STEP 2で使用）。`
+            `コートの片側端に「コーナー起点 A（目印）」を決め、メジャーを伸ばして <strong>${data.length.toFixed(1)}m</strong> の位置に「コーナー B（目印）」を置きます（※目印はコーン・石灰・小石などでOK）。`,
+            `メジャーの <strong>${(data.length / 2).toFixed(1)}m</strong> 地点に「中央目印（センター）」をつけます。`,
+            `コーナーAから <strong>${pyth.b.toFixed(1)}m</strong> の地点に「直角出し用の基準目印 P」をつけます（STEP 2で使用）。`
           ],
           svg: `
             <svg viewBox="0 0 100 24" class="w-full h-12 bg-pitch-900 rounded-lg p-1">
@@ -1604,7 +1604,7 @@
           details: [
             `2本のメジャーを用意します（または1本を回します）。`,
             `1本目: コーナーAからゴールライン方向へ <strong>${pyth.a.toFixed(1)}m</strong> 伸ばします。`,
-            `2本目: STEP1で打ったペグP (${pyth.b.toFixed(1)}m地点) から <strong>${pyth.c.toFixed(1)}m</strong> 伸ばします。`,
+            `2本目: STEP1でつけた基準目印 P (${pyth.b.toFixed(1)}m地点) から <strong>${pyth.c.toFixed(1)}m</strong> 伸ばします。`,
             `2本のメジャーの先端（${pyth.a.toFixed(1)}m と ${pyth.c.toFixed(1)}m）をピンと引っ張って交差させた点が「完全な直角方向の基準点 Q」になります！`
           ],
           svg: `
@@ -1626,7 +1626,7 @@
           key: "step_3",
           details: [
             `コーナーAを0mとして、点Qを通る直線上にメジャーを <strong>${data.width.toFixed(1)}m</strong> まっすぐ伸ばし、コーナーCを決定します。`,
-            `メジャーを固定したまま「メジャー目盛り表」に沿って一度にペグを打ちます:`,
+            `メジャーを固定（または足で踏んだまま）、「メジャー目盛り表」に沿って順に目印（石灰・コーンなど）をつけます:`,
             `・PA端: <strong>${((data.width - data.paWidth)/2).toFixed(1)}m</strong> / <strong>${(data.width - (data.width - data.paWidth)/2).toFixed(1)}m</strong>`,
             `・GA端: <strong>${((data.width - data.gaWidth)/2).toFixed(1)}m</strong> / <strong>${(data.width - (data.width - data.gaWidth)/2).toFixed(1)}m</strong>`,
             `・ゴールポスト: <strong>${((data.width - data.goalWidth)/2).toFixed(1)}m</strong> / <strong>${(data.width - (data.width - data.goalWidth)/2).toFixed(1)}m</strong>`,
@@ -1649,7 +1649,7 @@
           key: "step_4",
           details: [
             `コーナーBからコーナーCまでの対角線が <strong>${data.diagonal.toFixed(2)}m</strong> になっているか確認します。`,
-            `コーナーCからタッチライン方向へ <strong>${data.length.toFixed(1)}m</strong>、コーナーBからゴールライン方向へ <strong>${data.width.toFixed(1)}m</strong> の交点に「最後の四隅ペグ D」を打ちます。`,
+            `コーナーCからタッチライン方向へ <strong>${data.length.toFixed(1)}m</strong>、コーナーBからゴールライン方向へ <strong>${data.width.toFixed(1)}m</strong> の交点に「最後の四隅（コーナーD）」を決めます。`,
             `AからDへの対角線も <strong>${data.diagonal.toFixed(2)}m</strong> であれば、完璧な長方形（歪みなし）が完成です！`
           ],
           svg: `
@@ -1671,10 +1671,10 @@
           desc: `ピッチを二分するセンターラインと、キックオフの円を描きます。`,
           key: "step_5",
           details: [
-            `左右のタッチライン ${(data.length / 2).toFixed(1)}m のペグ同士を結んで「センターライン」を引きます。`,
-            `センターラインの中央（${(data.width / 2).toFixed(1)}m）に「センターマーク」を打ちます。`,
-            `センターマークにペグを固定し、メジャーまたはロープを <strong>${data.circleRadius.toFixed(1)}m</strong> 伸ばして360度回転させて「センターサークル」を描きます。`,
-            `ピッチ四隅のコーナーペグから半径 <strong>1.0m</strong> の円弧（コーナーアーク）を引きます。`
+            `左右のタッチライン ${(data.length / 2).toFixed(1)}m の中央目印同士を結んで「センターライン」を引きます。`,
+            `センターラインの中央（${(data.width / 2).toFixed(1)}m）に「センターマーク」をつけます。`,
+            `センターマークの中心を足で踏むか固定し、メジャーまたはロープを <strong>${data.circleRadius.toFixed(1)}m</strong> 伸ばして360度回転させて「センターサークル」を描きます。`,
+            `ピッチ四隅の各コーナーから半径 <strong>1.0m</strong> の円弧（コーナーアーク）を引きます。`
           ],
           svg: `
             <svg viewBox="0 0 100 35" class="w-full h-16 bg-pitch-900 rounded-lg p-1">
