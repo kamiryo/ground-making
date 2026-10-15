@@ -126,11 +126,11 @@
   <!-- ヘッダー -->
   <header class="bg-pitch-800 text-white sticky top-0 z-40 shadow-md transition-colors duration-200">
     <div class="max-w-md mx-auto px-3 py-2 flex items-center justify-between">
-      <div class="flex items-center space-x-1.5 min-w-0 flex-shrink">
-        <span class="text-xl flex-shrink-0">⚽</span>
+      <div class="flex items-center space-x-1 sm:space-x-1.5 min-w-0 flex-shrink">
+        <span class="text-lg sm:text-xl flex-shrink-0">⚽</span>
         <div class="min-w-0">
-          <h1 class="text-[14.5px] sm:text-base font-extrabold tracking-tight leading-tight whitespace-nowrap">グランドメイキング</h1>
-          <p class="text-[9.5px] sm:text-[10px] text-pitch-100 font-medium whitespace-nowrap">少年サッカー・8人制</p>
+          <h1 class="text-[13px] sm:text-base font-extrabold tracking-tight leading-tight whitespace-nowrap">グランドメイキング</h1>
+          <p class="text-[9px] sm:text-[10px] text-pitch-100 font-medium whitespace-nowrap">少年サッカー・8人制</p>
         </div>
       </div>
       
@@ -139,13 +139,19 @@
         <!-- 屋外モード切替 (直射日光ハイコントラスト + 画面スリープ防止 WakeLock を統合) -->
         <button id="toggleFieldModeBtn" type="button" title="屋外モード切替（直射日光表示 ＋ 画面スリープ防止）" class="h-8 px-1.5 sm:px-2 rounded-lg bg-pitch-900/80 hover:bg-black text-amber-300 font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
           <span id="fieldModeIcon" class="text-xs">☀️</span>
-          <span class="text-[10px] sm:text-[11px]" id="fieldModeLabel">屋外モードOFF</span>
+          <span class="text-[10px] sm:text-[11px]" id="fieldModeLabel">屋外OFF</span>
         </button>
 
         <!-- 寸法＆URL共有コピー (URL共有と寸法コピーをマージ) -->
         <button id="shareSummaryBtn" type="button" title="寸法テキストと共有URLを一括コピー（LINE共有等）" class="h-8 px-1.5 sm:px-2 rounded-lg bg-pitch-900/80 hover:bg-black text-white font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
           <svg class="w-3.5 h-3.5 text-amber-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
           <span class="text-[10px] sm:text-[11px]">寸法を共有</span>
+        </button>
+
+        <!-- 初期化 (全リセット) -->
+        <button id="resetAllSettingsBtn" type="button" title="すべての設定・寸法を初期状態（U-8: 50×32m）にリセット" class="h-8 w-8 sm:w-auto px-0 sm:px-2 rounded-lg bg-pitch-900/80 hover:bg-black text-rose-300 hover:text-white font-bold text-xs flex items-center justify-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-rose-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span class="hidden sm:inline text-[11px]">初期化</span>
         </button>
 
         <!-- 印刷 / PDF -->
@@ -166,7 +172,13 @@
           <svg class="w-3.5 h-3.5 mr-1 text-pitch-700" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path></svg>
           ワンタップ・プリセット
         </span>
-        <span class="text-[11px] text-pitch-700 font-bold bg-pitch-50 px-2 py-0.5 rounded-full" id="activePresetBadge">カスタム</span>
+        <div class="flex items-center space-x-1.5">
+          <span class="text-[11px] text-pitch-700 font-bold bg-pitch-50 px-2 py-0.5 rounded-full" id="activePresetBadge">カスタム</span>
+          <button type="button" id="resetPresetSectionBtn" title="すべての寸法・連動設定を初期状態（U-8: 50×32m）にリセット" class="text-[10px] font-bold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2 py-0.5 rounded border border-slate-200 transition active:scale-95 flex items-center space-x-0.5">
+            <span>↺</span>
+            <span>初期化</span>
+          </button>
+        </div>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
         <button type="button" data-preset="u8" class="preset-btn py-2 px-1 text-center rounded-lg border-2 border-slate-200 font-bold text-xs hover:border-pitch-600 transition active:scale-95">
@@ -2246,6 +2258,112 @@
       }
     });
 
+    /* ==========================================================================
+       全設定・寸法の初期化（初期状態リセット）
+       ========================================================================== */
+    function resetAllSettings(skipConfirm = false) {
+      if (!skipConfirm) {
+        const ok = confirm('コート寸法やカスタム設定をすべて初期状態（U-8標準: 50×32m）にリセットしますか？\n※現在の変更内容はすべて消去されます。');
+        if (!ok) return;
+      }
+
+      // 1. 基本寸法 & プリセット初期化 (U-8 標準 50x32m)
+      state.length = 50.0;
+      state.width = 32.0;
+      state.goalWidth = 5.0;
+      state.roundStep = 0.1;
+      state.aspectLock = true;
+      state.aspectRatio = 32.0 / 50.0;
+
+      // 2. コートサイズ連動 & エリアベース寸法
+      state.areaAutoLink = false;
+      state.areaBase = {
+        paDepth: 8.0,
+        paWidth: 20.8,
+        gaDepth: 4.0,
+        gaWidth: 12.8,
+        pkDist: 6.0,
+        circleRadius: 5.8,
+        penaltyArcRadius: 5.0
+      };
+
+      // 3. 手動オーバーライドの全解除
+      state.customOverrides = {
+        paDepth: null,
+        paWidth: null,
+        gaDepth: null,
+        gaWidth: null,
+        pkDist: null,
+        circleRadius: null,
+        penaltyArcRadius: null
+      };
+
+      // 4. ピタゴラス倍率 (4倍: 12-16-20m)
+      state.pythMultiplier = 4;
+
+      // 5. 表示設定
+      state.showPitchMarks = true;
+      state.svgOrientation = 'landscape';
+      state.currentTab = 'pitch';
+      state.tapeTarget = 'goal';
+      state.tapeReverse = false;
+
+      // 6. チェック状態
+      state.tapeChecks = {};
+      state.stepChecks = {};
+
+      // 7. セレクトボックス等のDOM要素同期
+      const gwEl = document.getElementById('goalWidthSelect');
+      if (gwEl) gwEl.value = '5.0';
+      const rsEl = document.getElementById('roundStepSelect');
+      if (rsEl) rsEl.value = '0.1';
+      const pythEl = document.getElementById('pythSelect');
+      if (pythEl) pythEl.value = '4';
+      const oriLabel = document.getElementById('orientationLabel');
+      if (oriLabel) oriLabel.textContent = '縦向き表示';
+      const oriIcon = document.getElementById('orientationIcon');
+      if (oriIcon) oriIcon.textContent = '🔄';
+
+      // 8. ローカルストレージ削除
+      try {
+        localStorage.removeItem('soccer_pitch_tool_v1');
+      } catch (e) {}
+
+      // 9. URLクエリパラメータのクリア
+      try {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      } catch (e) {}
+
+      // 10. カスタムエリアパネルを閉じる
+      const customPanel = document.getElementById('customAreaPanel');
+      const customArrow = document.getElementById('customAreaArrow');
+      if (customPanel && !customPanel.classList.contains('hidden')) {
+        customPanel.classList.add('hidden');
+        if (customArrow) customArrow.textContent = '▼ 詳細変更';
+      }
+
+      // 11. タブをコート図面に戻す
+      switchTab('pitch');
+
+      // 12. 全UIの再計算・再描画
+      updateAllUI();
+
+      // 13. トースト通知
+      showToast('🔄 すべての設定を初期状態（U-8: 50×32m）にリセットしました');
+    }
+
+    const resetAllSettingsBtn = document.getElementById('resetAllSettingsBtn');
+    if (resetAllSettingsBtn) {
+      resetAllSettingsBtn.addEventListener('click', () => resetAllSettings());
+    }
+
+    const resetPresetSectionBtn = document.getElementById('resetPresetSectionBtn');
+    if (resetPresetSectionBtn) {
+      resetPresetSectionBtn.addEventListener('click', () => resetAllSettings());
+    }
+
     // 屋外モード切替（直射日光ハイコントラスト ＋ 画面スリープ防止 WakeLock を統合）
     document.getElementById('toggleFieldModeBtn').addEventListener('click', async () => {
       state.sunMode = !state.sunMode;
@@ -2258,7 +2376,7 @@
         body.classList.add('sun-mode');
         btn.classList.add('field-mode-active');
         icon.textContent = '💡';
-        label.textContent = '屋外モードON';
+        label.textContent = '屋外ON';
 
         let wakeLockMsg = '';
         if ('wakeLock' in navigator) {
@@ -2280,7 +2398,7 @@
         body.classList.remove('sun-mode');
         btn.classList.remove('field-mode-active');
         icon.textContent = '☀️';
-        label.textContent = '屋外モードOFF';
+        label.textContent = '屋外OFF';
 
         if (wakeLockSentinel) {
           try {
@@ -2620,7 +2738,7 @@
             if (btn && icon && label) {
               btn.classList.add('field-mode-active');
               icon.textContent = '💡';
-              label.textContent = '屋外モードON';
+              label.textContent = '屋外ON';
             }
           }
         }
