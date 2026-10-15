@@ -1271,25 +1271,25 @@
             <line x1="${ox}" y1="${midY - 4.5}" x2="${ox + data.gaDepth}" y2="${midY - 4.5}" stroke="#38bdf8" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
             <circle cx="${ox + data.gaDepth}" cy="${midY - 4.5}" r="0.4" fill="#38bdf8" />
             <rect x="${ox + 0.3}" y="${midY - 7.0}" width="8.4" height="2.4" rx="0.4" fill="#0369a1" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${ox + 4.5}" y="${midY - 5.3}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">GA深さ: ${data.gaDepth}m</text>
+            <text x="${ox + 4.5}" y="${midY - 5.3}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">GA深さ: ${data.gaDepth.toFixed(1)}m</text>
 
             <!-- PA深さ寸法線 -->
             <line x1="${ox}" y1="${midY + 4.5}" x2="${ox + data.paDepth}" y2="${midY + 4.5}" stroke="#60a5fa" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
             <circle cx="${ox + data.paDepth}" cy="${midY + 4.5}" r="0.4" fill="#60a5fa" />
             <rect x="${ox + 0.3}" y="${midY + 4.9}" width="8.4" height="2.4" rx="0.4" fill="#1d4ed8" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${ox + 4.5}" y="${midY + 6.6}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">PA深さ: ${data.paDepth}m</text>
+            <text x="${ox + 4.5}" y="${midY + 6.6}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">PA深さ: ${data.paDepth.toFixed(1)}m</text>
 
             <!-- PKマーク距離表示 -->
             <line x1="${ox}" y1="${midY}" x2="${ox + data.pkDist}" y2="${midY}" stroke="#facc15" stroke-width="0.4" stroke-dasharray="0.6,0.6" />
             <rect x="${ox + 0.5}" y="${midY - 2.8}" width="6.6" height="2.3" rx="0.4" fill="#b45309" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${ox + 3.8}" y="${midY - 1.2}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">PK: ${data.pkDist}m</text>
+            <text x="${ox + 3.8}" y="${midY - 1.2}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">PK: ${data.pkDist.toFixed(1)}m</text>
 
             <!-- アーク半径 & サークル半径 -->
             <rect x="${ox + data.pkDist + 0.8}" y="${midY + 1.2}" width="9.2" height="2.3" rx="0.4" fill="#0f766e" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${ox + data.pkDist + 5.4}" y="${midY + 2.8}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">アーク: R${data.penaltyArcRadius}m</text>
+            <text x="${ox + data.pkDist + 5.4}" y="${midY + 2.8}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">アーク: R${data.penaltyArcRadius.toFixed(1)}m</text>
 
             <rect x="${midX - 8.0}" y="${midY + data.circleRadius + 1.2}" width="16.0" height="2.7" rx="0.5" fill="#15803d" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${midX}" y="${midY + data.circleRadius + 3.0}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">サークル半径: ${data.circleRadius}m</text>
+            <text x="${midX}" y="${midY + data.circleRadius + 3.0}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">サークル半径: ${data.circleRadius.toFixed(1)}m</text>
           `;
         }
 
@@ -1459,25 +1459,25 @@
             <line x1="${midX + 5.0}" y1="${oy + pitchL}" x2="${midX + 5.0}" y2="${bottomGaTop}" stroke="#38bdf8" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
             <circle cx="${midX + 5.0}" cy="${bottomGaTop}" r="0.4" fill="#38bdf8" />
             <rect x="${midX + 5.5}" y="${bottomGaTop + 0.6}" width="8.2" height="2.4" rx="0.4" fill="#0369a1" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${midX + 9.6}" y="${bottomGaTop + 2.3}" fill="#ffffff" font-size="1.6" font-weight="900" text-anchor="middle">GA深さ: ${data.gaDepth}m</text>
+            <text x="${midX + 9.6}" y="${bottomGaTop + 2.3}" fill="#ffffff" font-size="1.6" font-weight="900" text-anchor="middle">GA深さ: ${data.gaDepth.toFixed(1)}m</text>
 
             <!-- PA深さ寸法線 (下ゴール側) -->
             <line x1="${midX - 5.0}" y1="${oy + pitchL}" x2="${midX - 5.0}" y2="${bottomPaTop}" stroke="#60a5fa" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
             <circle cx="${midX - 5.0}" cy="${bottomPaTop}" r="0.4" fill="#60a5fa" />
             <rect x="${midX - 13.7}" y="${bottomPaTop + 0.6}" width="8.2" height="2.4" rx="0.4" fill="#1d4ed8" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${midX - 9.6}" y="${bottomPaTop + 2.3}" fill="#ffffff" font-size="1.6" font-weight="900" text-anchor="middle">PA深さ: ${data.paDepth}m</text>
+            <text x="${midX - 9.6}" y="${bottomPaTop + 2.3}" fill="#ffffff" font-size="1.6" font-weight="900" text-anchor="middle">PA深さ: ${data.paDepth.toFixed(1)}m</text>
 
             <!-- PKマーク距離 (下ゴール側) -->
             <line x1="${midX}" y1="${oy + pitchL}" x2="${midX}" y2="${bottomPkY}" stroke="#facc15" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
             <rect x="${midX - 3.5}" y="${bottomPkY + 0.8}" width="7.0" height="2.3" rx="0.4" fill="#b45309" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${midX}" y="${bottomPkY + 2.4}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">PK: ${data.pkDist}m</text>
+            <text x="${midX}" y="${bottomPkY + 2.4}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">PK: ${data.pkDist.toFixed(1)}m</text>
 
             <!-- アーク半径 & サークル半径 -->
             <rect x="${midX + 5.5}" y="${bottomPaTop - 3.0}" width="9.2" height="2.3" rx="0.4" fill="#0f766e" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${midX + 10.1}" y="${bottomPaTop - 1.4}" fill="#ffffff" font-size="1.6" font-weight="900" text-anchor="middle">アーク: R${data.penaltyArcRadius}m</text>
+            <text x="${midX + 10.1}" y="${bottomPaTop - 1.4}" fill="#ffffff" font-size="1.6" font-weight="900" text-anchor="middle">アーク: R${data.penaltyArcRadius.toFixed(1)}m</text>
 
             <rect x="${midX - 8.0}" y="${midY + data.circleRadius + 1.2}" width="16.0" height="2.7" rx="0.5" fill="#15803d" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${midX}" y="${midY + data.circleRadius + 3.0}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">サークル半径: ${data.circleRadius}m</text>
+            <text x="${midX}" y="${midY + data.circleRadius + 3.0}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">サークル半径: ${data.circleRadius.toFixed(1)}m</text>
           `;
         }
 
@@ -2021,13 +2021,21 @@
       const step = state.roundStep || 0.1;
       const dir = deltaOrDirection > 0 ? 1 : -1;
 
-      let newVal;
+      // 浮動小数点誤差を避けるため、10倍して整数で計算（0.1m単位・0.5m単位の両方に対応）
+      const currentInt = Math.round(currentVal * 10);
+      const stepInt = Math.round(step * 10);
+
+      // 現在値をstepIntの倍数に丸めてから加減算
+      const remainder = currentInt % stepInt;
+      let nextInt;
       if (dir > 0) {
-        newVal = (Math.floor(Number((currentVal + 0.0001).toFixed(2)) / step) + 1) * step;
+        nextInt = (remainder === 0) ? currentInt + stepInt : currentInt + (stepInt - remainder);
       } else {
-        newVal = (Math.ceil(Number((currentVal - 0.0001).toFixed(2)) / step) - 1) * step;
+        nextInt = (remainder === 0) ? currentInt - stepInt : currentInt - remainder;
       }
-      newVal = Math.max(step, Number(newVal.toFixed(1)));
+
+      if (nextInt < stepInt) nextInt = stepInt;
+      const newVal = Number((nextInt / 10).toFixed(1));
       setOverride(key, newVal);
     }
 
