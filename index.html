@@ -1136,10 +1136,10 @@
       const pitchW = data.width;  // 横
 
       // 余白設定: 冗長なメジャー文字を省き、スマホ画面でピッチを大きく明瞭に表示
-      const marginL = state.showPitchMarks ? (isLandscape ? 11.0 : 9.5) : 4.5;
-      const marginR = state.showPitchMarks ? (isLandscape ? 12.5 : 10.5) : 4.5;
-      const marginT = state.showPitchMarks ? (isLandscape ? 6.5 : 11.5) : 4.5;
-      const marginB = state.showPitchMarks ? (isLandscape ? 6.5 : 6.0) : 4.5;
+      const marginL = state.showPitchMarks ? (isLandscape ? 11.5 : 9.5) : 4.5;
+      const marginR = state.showPitchMarks ? (isLandscape ? 13.0 : 11.0) : 4.5;
+      const marginT = state.showPitchMarks ? (isLandscape ? 7.0 : 12.0) : 4.5;
+      const marginB = state.showPitchMarks ? (isLandscape ? 7.2 : 6.5) : 4.5;
 
       const svgW = isLandscape ? (pitchL + marginL + marginR) : (pitchW + marginL + marginR);
       const svgH = isLandscape ? (pitchW + marginT + marginB) : (pitchL + marginT + marginB);
@@ -1199,32 +1199,32 @@
             <!-- 0m 始点バッジ (角の真上) -->
             <circle cx="${ox + pitchL}" cy="${oy}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
             <line x1="${ox + pitchL}" y1="${oy}" x2="${ox + pitchL}" y2="${oy - 1.2}" stroke="#ef4444" stroke-width="0.3" />
-            <rect x="${ox + pitchL - 3.8}" y="${oy - 4.4}" width="7.6" height="2.8" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${ox + pitchL}" y="${oy - 3.1}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">0m</text>
-            <text x="${ox + pitchL}" y="${oy - 1.9}" fill="#fef08a" font-size="1.1" font-weight="bold" text-anchor="middle">始点</text>
+            <rect x="${ox + pitchL - 4.0}" y="${oy - 4.8}" width="8.0" height="3.4" rx="0.6" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchL}" y="${oy - 3.15}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">0m</text>
+            <text x="${ox + pitchL}" y="${oy - 1.9}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">始点</text>
 
             <!-- 終点バッジ (角の斜め右下、31mアークと重ならないよう配置) -->
             <circle cx="${ox + pitchL}" cy="${oy + pitchW}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
             <line x1="${ox + pitchL}" y1="${oy + pitchW}" x2="${ox + pitchL + 1.2}" y2="${oy + pitchW + 2.0}" stroke="#ef4444" stroke-width="0.3" />
-            <rect x="${ox + pitchL + 1.2}" y="${oy + pitchW + 1.4}" width="8.0" height="2.8" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${ox + pitchL + 5.2}" y="${oy + pitchW + 2.65}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">${pitchW.toFixed(1)}m</text>
-            <text x="${ox + pitchL + 5.2}" y="${oy + pitchW + 3.75}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">終点</text>
+            <rect x="${ox + pitchL + 1.2}" y="${oy + pitchW + 1.4}" width="8.4" height="3.4" rx="0.6" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchL + 5.4}" y="${oy + pitchW + 3.05}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">${pitchW.toFixed(1)}m</text>
+            <text x="${ox + pitchL + 5.4}" y="${oy + pitchW + 4.3}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">終点</text>
           `;
 
           marks.forEach((m, idx) => {
             const bx = ox + pitchL + 1.2;
-            const bw = 8.0;
-            const bh = 2.8;
+            const bw = 8.4;
+            const bh = 3.4;
             // 最後の31mアークは終点バッジとの接触を避けるため少し上へ配置
-            const by = (idx === marks.length - 1) ? (m.y - 2.0) : (m.y - 1.4);
+            const by = (idx === marks.length - 1) ? (m.y - 2.4) : (m.y - 1.7);
             const cx = bx + bw / 2;
 
             goalMarksSvg += `
               <circle cx="${ox + pitchL}" cy="${m.y}" r="0.6" fill="${m.color}" stroke="#ffffff" stroke-width="0.2" />
               <line x1="${ox + pitchL}" y1="${m.y}" x2="${bx}" y2="${m.y}" stroke="${m.color}" stroke-width="0.25" />
-              <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="0.5" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-              <text x="${cx}" y="${by + 1.25}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">${m.dist.toFixed(1)}m</text>
-              <text x="${cx}" y="${by + 2.35}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">${m.sub}</text>
+              <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="0.6" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+              <text x="${cx}" y="${by + 1.65}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">${m.dist.toFixed(1)}m</text>
+              <text x="${cx}" y="${by + 2.9}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">${m.sub}</text>
             `;
           });
         }
@@ -1245,17 +1245,17 @@
             <!-- 0m 始点バッジ (角の左上外側) -->
             <circle cx="${ox}" cy="${oy + pitchW}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
             <line x1="${ox}" y1="${oy + pitchW}" x2="${ox - 1.2}" y2="${oy + pitchW - 1.4}" stroke="#ef4444" stroke-width="0.3" />
-            <rect x="${ox - 8.8}" y="${oy + pitchW - 3.4}" width="7.6" height="2.8" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${ox - 5.0}" y="${oy + pitchW - 2.15}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">0m</text>
-            <text x="${ox - 5.0}" y="${oy + pitchW - 1.05}" fill="#fef08a" font-size="1.1" font-weight="bold" text-anchor="middle">始点</text>
+            <rect x="${ox - 9.2}" y="${oy + pitchW - 3.8}" width="8.0" height="3.4" rx="0.6" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox - 5.2}" y="${oy + pitchW - 2.15}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">0m</text>
+            <text x="${ox - 5.2}" y="${oy + pitchW - 0.9}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">始点</text>
 
             <!-- 終点ピン (50m) -->
             <circle cx="${ox + pitchL}" cy="${oy + pitchW}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
           `;
 
           marks.forEach((m) => {
-            const bw = 7.6;
-            const bh = 2.8;
+            const bw = 8.4;
+            const bh = 3.4;
             let bx = m.x - bw / 2;
             if (m.align === 'right') {
               bx = m.x - 0.2; // ピンの右側へ展開
@@ -1268,9 +1268,9 @@
             touchMarksSvg += `
               <circle cx="${m.x}" cy="${oy + pitchW}" r="0.6" fill="${m.color}" stroke="#ffffff" stroke-width="0.2" />
               <line x1="${m.x}" y1="${oy + pitchW}" x2="${m.x}" y2="${by}" stroke="${m.color}" stroke-width="0.25" />
-              <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="0.5" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-              <text x="${cx}" y="${by + 1.25}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">${m.dist.toFixed(1)}m</text>
-              <text x="${cx}" y="${by + 2.35}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">${m.sub}</text>
+              <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="0.6" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+              <text x="${cx}" y="${by + 1.65}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">${m.dist.toFixed(1)}m</text>
+              <text x="${cx}" y="${by + 2.9}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">${m.sub}</text>
             `;
           });
         }
@@ -1282,26 +1282,26 @@
             <!-- GA深さ寸法線 -->
             <line x1="${ox}" y1="${midY - 4.5}" x2="${ox + data.gaDepth}" y2="${midY - 4.5}" stroke="#38bdf8" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
             <circle cx="${ox + data.gaDepth}" cy="${midY - 4.5}" r="0.4" fill="#38bdf8" />
-            <rect x="${ox + 0.3}" y="${midY - 7.0}" width="8.4" height="2.4" rx="0.4" fill="#0369a1" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${ox + 4.5}" y="${midY - 5.3}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">GA深さ: ${data.gaDepth.toFixed(1)}m</text>
+            <rect x="${ox + 0.3}" y="${midY - 7.4}" width="9.2" height="2.8" rx="0.5" fill="#0369a1" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${ox + 4.9}" y="${midY - 5.5}" fill="#ffffff" font-size="1.65" font-weight="900" text-anchor="middle">GA深さ: ${data.gaDepth.toFixed(1)}m</text>
 
             <!-- PA深さ寸法線 -->
             <line x1="${ox}" y1="${midY + 4.5}" x2="${ox + data.paDepth}" y2="${midY + 4.5}" stroke="#60a5fa" stroke-width="0.35" stroke-dasharray="0.5,0.5" />
             <circle cx="${ox + data.paDepth}" cy="${midY + 4.5}" r="0.4" fill="#60a5fa" />
-            <rect x="${ox + 0.3}" y="${midY + 4.9}" width="8.4" height="2.4" rx="0.4" fill="#1d4ed8" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${ox + 4.5}" y="${midY + 6.6}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">PA深さ: ${data.paDepth.toFixed(1)}m</text>
+            <rect x="${ox + 0.3}" y="${midY + 4.8}" width="9.2" height="2.8" rx="0.5" fill="#1d4ed8" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${ox + 4.9}" y="${midY + 6.7}" fill="#ffffff" font-size="1.65" font-weight="900" text-anchor="middle">PA深さ: ${data.paDepth.toFixed(1)}m</text>
 
             <!-- PKマーク距離表示 -->
             <line x1="${ox}" y1="${midY}" x2="${ox + data.pkDist}" y2="${midY}" stroke="#facc15" stroke-width="0.4" stroke-dasharray="0.6,0.6" />
-            <rect x="${ox + 0.5}" y="${midY - 2.8}" width="6.6" height="2.3" rx="0.4" fill="#b45309" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${ox + 3.8}" y="${midY - 1.2}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">PK: ${data.pkDist.toFixed(1)}m</text>
+            <rect x="${ox + 0.5}" y="${midY - 3.0}" width="7.2" height="2.8" rx="0.5" fill="#b45309" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${ox + 4.1}" y="${midY - 1.1}" fill="#ffffff" font-size="1.75" font-weight="900" text-anchor="middle">PK: ${data.pkDist.toFixed(1)}m</text>
 
             <!-- アーク半径 & サークル半径 -->
-            <rect x="${ox + data.pkDist + 0.8}" y="${midY + 1.2}" width="9.2" height="2.3" rx="0.4" fill="#0f766e" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
-            <text x="${ox + data.pkDist + 5.4}" y="${midY + 2.8}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">アーク: R${data.penaltyArcRadius.toFixed(1)}m</text>
+            <rect x="${ox + data.pkDist + 0.8}" y="${midY + 1.2}" width="10.0" height="2.8" rx="0.5" fill="#0f766e" stroke="#ffffff" stroke-width="0.15" opacity="0.95" />
+            <text x="${ox + data.pkDist + 5.8}" y="${midY + 3.1}" fill="#ffffff" font-size="1.65" font-weight="900" text-anchor="middle">アーク: R${data.penaltyArcRadius.toFixed(1)}m</text>
 
-            <rect x="${midX - 8.0}" y="${midY + data.circleRadius + 1.2}" width="16.0" height="2.7" rx="0.5" fill="#15803d" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${midX}" y="${midY + data.circleRadius + 3.0}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">サークル半径: ${data.circleRadius.toFixed(1)}m</text>
+            <rect x="${midX - 9.0}" y="${midY + data.circleRadius + 1.2}" width="18.0" height="3.4" rx="0.6" fill="#15803d" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${midX}" y="${midY + data.circleRadius + 3.5}" fill="#ffffff" font-size="2.0" font-weight="900" text-anchor="middle">サークル半径: ${data.circleRadius.toFixed(1)}m</text>
           `;
         }
 
@@ -1387,24 +1387,24 @@
             <!-- 0m 始点バッジ (左端外側へ展開して1mアークと完全分離) -->
             <circle cx="${ox}" cy="${oy}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
             <line x1="${ox}" y1="${oy}" x2="${ox - 1.2}" y2="${oy}" stroke="#ef4444" stroke-width="0.3" />
-            <rect x="${ox - 8.2}" y="${oy - 1.4}" width="7.0" height="2.8" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${ox - 4.7}" y="${oy - 0.15}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">0m</text>
-            <text x="${ox - 4.7}" y="${oy + 0.95}" fill="#fef08a" font-size="1.1" font-weight="bold" text-anchor="middle">始点</text>
+            <rect x="${ox - 8.6}" y="${oy - 1.7}" width="7.4" height="3.4" rx="0.6" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox - 4.9}" y="${oy - 0.05}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">0m</text>
+            <text x="${ox - 4.9}" y="${oy + 1.2}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">始点</text>
 
             <!-- 終点バッジ (右上斜め上へ展開してタッチライン1mアークと完全分離) -->
             <circle cx="${ox + pitchW}" cy="${oy}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
             <line x1="${ox + pitchW}" y1="${oy}" x2="${ox + pitchW + 1.2}" y2="${oy - 2.0}" stroke="#ef4444" stroke-width="0.3" />
-            <rect x="${ox + pitchW + 1.2}" y="${oy - 3.6}" width="7.2" height="2.8" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${ox + pitchW + 4.8}" y="${oy - 2.35}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">${pitchW.toFixed(1)}m</text>
-            <text x="${ox + pitchW + 4.8}" y="${oy - 1.25}" fill="#fef08a" font-size="1.1" font-weight="bold" text-anchor="middle">終点</text>
+            <rect x="${ox + pitchW + 1.2}" y="${oy - 3.8}" width="7.8" height="3.4" rx="0.6" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchW + 5.1}" y="${oy - 2.15}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">${pitchW.toFixed(1)}m</text>
+            <text x="${ox + pitchW + 5.1}" y="${oy - 0.9}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">終点</text>
           `;
 
           marks.forEach((m) => {
             const isTier1 = (m.tier === 1);
             const lineEndY = isTier1 ? (oy - 1.2) : (oy - 4.8);
-            const by = isTier1 ? (oy - 4.0) : (oy - 7.6);
-            const bw = 5.4;
-            const bh = 2.8;
+            const by = isTier1 ? (oy - 4.3) : (oy - 8.2);
+            const bw = 5.8;
+            const bh = 3.4;
             let bx = m.x - bw / 2;
             if (m.pos === 'leftEdge') {
               bx = ox + 0.2;
@@ -1416,9 +1416,9 @@
             goalMarksSvg += `
               <circle cx="${m.x}" cy="${oy}" r="0.6" fill="${m.color}" stroke="#ffffff" stroke-width="0.2" />
               <line x1="${m.x}" y1="${oy}" x2="${m.x}" y2="${lineEndY}" stroke="${m.color}" stroke-width="0.25" ${!isTier1 ? 'stroke-dasharray="0.4,0.4"' : ''} />
-              <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="0.5" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-              <text x="${cx}" y="${by + 1.25}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">${m.dist.toFixed(1)}m</text>
-              <text x="${cx}" y="${by + 2.35}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">${m.sub}</text>
+              <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="0.6" fill="${m.bg}" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+              <text x="${cx}" y="${by + 1.65}" fill="#ffffff" font-size="1.65" font-weight="900" text-anchor="middle">${m.dist.toFixed(1)}m</text>
+              <text x="${cx}" y="${by + 2.9}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">${m.sub}</text>
             `;
           });
         }
@@ -1432,30 +1432,30 @@
             <!-- 1.0m アークピン (角の32m終点バッジと干渉しないよう下向きに配置) -->
             <circle cx="${ox + pitchW}" cy="${oy + 1.0}" r="0.6" fill="#38bdf8" stroke="#ffffff" stroke-width="0.2" />
             <line x1="${ox + pitchW}" y1="${oy + 1.0}" x2="${ox + pitchW + 1.2}" y2="${oy + 1.0}" stroke="#38bdf8" stroke-width="0.25" />
-            <rect x="${ox + pitchW + 1.2}" y="${oy + 0.5}" width="7.0" height="2.8" rx="0.5" fill="#0284c7" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${ox + pitchW + 4.7}" y="${oy + 1.75}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">1.0m</text>
-            <text x="${ox + pitchW + 4.7}" y="${oy + 2.85}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">アーク</text>
+            <rect x="${ox + pitchW + 1.2}" y="${oy + 0.5}" width="7.6" height="3.4" rx="0.6" fill="#0284c7" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchW + 5.0}" y="${oy + 2.15}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">1.0m</text>
+            <text x="${ox + pitchW + 5.0}" y="${oy + 3.4}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">アーク</text>
 
             <!-- 中央ピン (pitchL / 2) -->
             <circle cx="${ox + pitchW}" cy="${midY}" r="0.6" fill="#facc15" stroke="#ffffff" stroke-width="0.2" />
             <line x1="${ox + pitchW}" y1="${midY}" x2="${ox + pitchW + 1.2}" y2="${midY}" stroke="#facc15" stroke-width="0.25" />
-            <rect x="${ox + pitchW + 1.2}" y="${midY - 1.4}" width="7.0" height="2.8" rx="0.5" fill="#b45309" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${ox + pitchW + 4.7}" y="${midY - 0.15}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">${(pitchL / 2).toFixed(1)}m</text>
-            <text x="${ox + pitchW + 4.7}" y="${midY + 0.95}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">中央</text>
+            <rect x="${ox + pitchW + 1.2}" y="${midY - 1.7}" width="7.6" height="3.4" rx="0.6" fill="#b45309" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchW + 5.0}" y="${midY - 0.05}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">${(pitchL / 2).toFixed(1)}m</text>
+            <text x="${ox + pitchW + 5.0}" y="${midY + 1.2}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">中央</text>
 
             <!-- 49.0m アークピン (終点と干渉しないよう上向きに配置) -->
             <circle cx="${ox + pitchW}" cy="${oy + pitchL - 1.0}" r="0.6" fill="#38bdf8" stroke="#ffffff" stroke-width="0.2" />
             <line x1="${ox + pitchW}" y1="${oy + pitchL - 1.0}" x2="${ox + pitchW + 1.2}" y2="${oy + pitchL - 1.8}" stroke="#38bdf8" stroke-width="0.25" />
-            <rect x="${ox + pitchW + 1.2}" y="${oy + pitchL - 3.4}" width="7.0" height="2.8" rx="0.5" fill="#0284c7" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${ox + pitchW + 4.7}" y="${oy + pitchL - 2.15}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">${(pitchL - 1.0).toFixed(1)}m</text>
-            <text x="${ox + pitchW + 4.7}" y="${oy + pitchL - 1.05}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">アーク</text>
+            <rect x="${ox + pitchW + 1.2}" y="${oy + pitchL - 3.8}" width="7.6" height="3.4" rx="0.6" fill="#0284c7" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchW + 5.0}" y="${oy + pitchL - 2.15}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">${(pitchL - 1.0).toFixed(1)}m</text>
+            <text x="${ox + pitchW + 5.0}" y="${oy + pitchL - 0.9}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">アーク</text>
 
             <!-- 終点バッジ (50m: 右下角斜め下へ展開) -->
             <circle cx="${ox + pitchW}" cy="${oy + pitchL}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
             <line x1="${ox + pitchW}" y1="${oy + pitchL}" x2="${ox + pitchW + 1.2}" y2="${oy + pitchL + 1.4}" stroke="#ef4444" stroke-width="0.3" />
-            <rect x="${ox + pitchW + 1.2}" y="${oy + pitchL + 0.8}" width="7.0" height="2.8" rx="0.5" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
-            <text x="${ox + pitchW + 4.7}" y="${oy + pitchL + 2.05}" fill="#ffffff" font-size="1.8" font-weight="900" text-anchor="middle">${pitchL.toFixed(1)}m</text>
-            <text x="${ox + pitchW + 4.7}" y="${oy + pitchL + 3.15}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">終点</text>
+            <rect x="${ox + pitchW + 1.2}" y="${oy + pitchL + 0.8}" width="7.6" height="3.4" rx="0.6" fill="#dc2626" stroke="#ffffff" stroke-width="0.2" opacity="0.95" />
+            <text x="${ox + pitchW + 5.0}" y="${oy + pitchL + 2.45}" fill="#ffffff" font-size="1.7" font-weight="900" text-anchor="middle">${pitchL.toFixed(1)}m</text>
+            <text x="${ox + pitchW + 5.0}" y="${oy + pitchL + 3.7}" fill="#fef08a" font-size="1.05" font-weight="bold" text-anchor="middle">終点</text>
           `;
         }
 
