@@ -1009,11 +1009,11 @@
       const pitchL = data.length; // 縦
       const pitchW = data.width;  // 横
 
-      // 余白設定: 右側や下側のバッジがスマホ画面端で見切れないよう十分な余白を確保
-      const marginL = state.showPitchMarks ? (isLandscape ? 12.0 : 11.5) : 4.5;
-      const marginR = state.showPitchMarks ? (isLandscape ? 14.5 : 14.5) : 4.5;
-      const marginT = state.showPitchMarks ? (isLandscape ? 8.0 : 15.0) : 4.5;
-      const marginB = state.showPitchMarks ? (isLandscape ? 8.5 : 7.5) : 4.5;
+      // 余白設定: 冗長なメジャー文字を省き、スマホ画面でピッチを大きく明瞭に表示
+      const marginL = state.showPitchMarks ? (isLandscape ? 11.0 : 9.5) : 4.5;
+      const marginR = state.showPitchMarks ? (isLandscape ? 12.5 : 10.5) : 4.5;
+      const marginT = state.showPitchMarks ? (isLandscape ? 6.5 : 11.5) : 4.5;
+      const marginB = state.showPitchMarks ? (isLandscape ? 6.5 : 6.0) : 4.5;
 
       const svgW = isLandscape ? (pitchL + marginL + marginR) : (pitchW + marginL + marginR);
       const svgH = isLandscape ? (pitchW + marginT + marginB) : (pitchL + marginT + marginB);
@@ -1069,7 +1069,6 @@
           goalMarksSvg += `
             <!-- 右ゴールライン メジャー帯 -->
             <line x1="${ox + pitchL}" y1="${oy}" x2="${ox + pitchL}" y2="${oy + pitchW}" stroke="#facc15" stroke-width="0.8" opacity="0.9" />
-            <text x="${ox + pitchL + 0.8}" y="${oy - 4.8}" fill="#facc15" font-size="1.7" font-weight="900">📏 メジャー: ${pitchW.toFixed(1)}m ➔</text>
 
             <!-- 0m 始点バッジ (角の真上) -->
             <circle cx="${ox + pitchL}" cy="${oy}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
@@ -1116,7 +1115,6 @@
           touchMarksSvg += `
             <!-- 下タッチライン メジャー帯 -->
             <line x1="${ox}" y1="${oy + pitchW}" x2="${ox + pitchL}" y2="${oy + pitchW}" stroke="#facc15" stroke-width="0.8" opacity="0.9" />
-            <text x="${ox + pitchL / 2}" y="${oy + pitchW + 6.2}" fill="#facc15" font-size="1.9" font-weight="900" text-anchor="middle">📏 メジャー: ${pitchL.toFixed(1)}m ➔</text>
 
             <!-- 0m 始点バッジ (角の左上外側) -->
             <circle cx="${ox}" cy="${oy + pitchW}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
@@ -1259,7 +1257,6 @@
 
           goalMarksSvg += `
             <line x1="${ox}" y1="${oy}" x2="${ox + pitchW}" y2="${oy}" stroke="#facc15" stroke-width="0.8" opacity="0.9" />
-            <text x="${midX}" y="${oy - 9.4}" fill="#facc15" font-size="1.9" font-weight="900" text-anchor="middle">📏 メジャー: ${pitchW.toFixed(1)}m ➔</text>
 
             <!-- 0m 始点バッジ (左端外側へ展開して1mアークと完全分離) -->
             <circle cx="${ox}" cy="${oy}" r="0.7" fill="#ef4444" stroke="#ffffff" stroke-width="0.25" />
@@ -1305,8 +1302,6 @@
         if (state.showPitchMarks) {
           touchMarksSvg += `
             <line x1="${ox + pitchW}" y1="${oy}" x2="${ox + pitchW}" y2="${oy + pitchL}" stroke="#facc15" stroke-width="0.8" opacity="0.9" />
-            <!-- タッチライン沿いの縦向きメジャー帯ラベル -->
-            <text x="${ox + pitchW + 9.8}" y="${midY}" fill="#facc15" font-size="1.9" font-weight="900" text-anchor="middle" transform="rotate(90 ${ox + pitchW + 9.8} ${midY})">📏 メジャー: ${pitchL.toFixed(1)}m ➔</text>
 
             <!-- 1.0m アークピン (角の32m終点バッジと干渉しないよう下向きに配置) -->
             <circle cx="${ox + pitchW}" cy="${oy + 1.0}" r="0.6" fill="#38bdf8" stroke="#ffffff" stroke-width="0.2" />
@@ -1413,8 +1408,8 @@
           <text x="${ox + data.pyth.a / 2 + 0.6}" y="${oy + data.pyth.b / 2 + 0.6}" fill="#facc15" font-size="1.5" font-weight="bold">${data.pyth.c}m(5)</text>
 
           <!-- 寸法ラベル (最上部と左側に配置) -->
-          <text x="${midX}" y="${oy - 12.0}" fill="#ffffff" font-size="2.4" font-weight="900" text-anchor="middle">横: ${pitchW.toFixed(1)}m</text>
-          <text x="${ox - 4.5}" y="${midY}" fill="#ffffff" font-size="2.4" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 4.5} ${midY})">縦: ${pitchL.toFixed(1)}m</text>
+          <text x="${midX}" y="${oy - 9.0}" fill="#ffffff" font-size="2.4" font-weight="900" text-anchor="middle">横: ${pitchW.toFixed(1)}m</text>
+          <text x="${ox - 4.2}" y="${midY}" fill="#ffffff" font-size="2.4" font-weight="900" text-anchor="middle" transform="rotate(-90 ${ox - 4.2} ${midY})">縦: ${pitchL.toFixed(1)}m</text>
 
           <!-- STEP④ & STEP⑥ 目盛り＆寸法オーバーレイ -->
           ${goalMarksSvg}
