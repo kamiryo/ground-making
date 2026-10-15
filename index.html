@@ -1737,14 +1737,28 @@
             `2本のメジャーの先端（${pyth.a.toFixed(1)}m と ${pyth.c.toFixed(1)}m）をピンと引っ張って交差させた点が「完全な直角方向の基準点 Q」になります！`
           ],
           svg: `
-            <svg viewBox="0 0 100 40" class="w-full h-20 bg-pitch-900 rounded-lg p-1">
-              <line x1="15" y1="32" x2="75" y2="32" stroke="#ffffff" stroke-width="1.5" />
-              <line x1="15" y1="32" x2="15" y2="10" stroke="#38bdf8" stroke-width="2" />
-              <line x1="55" y1="32" x2="15" y2="10" stroke="#facc15" stroke-width="2" stroke-dasharray="2,2" />
-              <circle cx="15" cy="32" r="2.5" fill="#ef4444" /><text x="10" y="34" fill="#fff" font-size="5">A(直角)</text>
-              <circle cx="55" cy="32" r="2" fill="#38bdf8" /><text x="55" y="38" fill="#38bdf8" font-size="5" text-anchor="middle">P(${pyth.b}m)</text>
-              <circle cx="15" cy="10" r="2.5" fill="#22c55e" /><text x="18" y="9" fill="#22c55e" font-size="5" font-weight="bold">Q交点(${pyth.c}m)</text>
-              <text x="7" y="22" fill="#38bdf8" font-size="5">${pyth.a}m</text>
+            <svg viewBox="0 0 100 44" class="w-full h-20 bg-pitch-900 rounded-lg p-1">
+              <!-- 基準タッチライン (白実線) -->
+              <line x1="16" y1="25" x2="84" y2="25" stroke="#ffffff" stroke-width="1.5" />
+              <!-- 直角ゴールライン方向 (青実線) -->
+              <line x1="22" y1="25" x2="22" y2="7" stroke="#38bdf8" stroke-width="2" />
+              <!-- 斜辺メジャー (黄破線) -->
+              <line x1="62" y1="25" x2="22" y2="7" stroke="#facc15" stroke-width="2" stroke-dasharray="2,2" />
+              <!-- 直角マーク ∟ -->
+              <path d="M 22 20 L 27 20 L 27 25" fill="none" stroke="#38bdf8" stroke-width="1" />
+              <!-- 点A (コーナー・直角) -->
+              <circle cx="22" cy="25" r="2.5" fill="#ef4444" />
+              <text x="22" y="38" fill="#ffffff" font-size="4.5" text-anchor="middle" font-weight="bold">A(直角)</text>
+              <!-- 点P (基準目印) -->
+              <circle cx="62" cy="25" r="2" fill="#38bdf8" />
+              <text x="62" y="38" fill="#38bdf8" font-size="4.5" text-anchor="middle">P(${pyth.b}m)</text>
+              <!-- 点Q (直角交点) -->
+              <circle cx="22" cy="7" r="2.5" fill="#22c55e" />
+              <text x="26" y="8" fill="#22c55e" font-size="4.5" font-weight="bold">Q交点(${pyth.c}m)</text>
+              <!-- 縦寸法 -->
+              <text x="19" y="17" fill="#38bdf8" font-size="4.5" text-anchor="end" font-weight="bold">${pyth.a}m</text>
+              <!-- 斜辺寸法 -->
+              <text x="45" y="15" fill="#facc15" font-size="4.2" text-anchor="middle" font-weight="bold">${pyth.c}m</text>
             </svg>
           `
         },
