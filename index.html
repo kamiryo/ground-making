@@ -57,7 +57,7 @@
       color: #000000 !important;
     }
 
-    /* 現場作業モード ON 時のボタンスタイル（通常時・直射日光時問わず高視認性） */
+    /* 屋外モード ON 時のボタンスタイル（通常時・直射日光時問わず高視認性） */
     .field-mode-active {
       background-color: #facc15 !important;
       color: #0f172a !important;
@@ -130,16 +130,16 @@
         <span class="text-2xl flex-shrink-0">⚽</span>
         <div class="min-w-0">
           <h1 class="text-base font-extrabold tracking-tight leading-tight whitespace-nowrap">グランドメイキング</h1>
-          <p class="text-[10px] text-pitch-100 font-medium whitespace-nowrap">少年サッカー・8人制 コート設営ナビ</p>
+          <p class="text-[10px] text-pitch-100 font-medium whitespace-nowrap">少年サッカー・8人制</p>
         </div>
       </div>
       
       <!-- ヘッダー便利機能ボタン -->
       <div class="flex items-center space-x-1.5 flex-shrink-0 no-print">
-        <!-- 現場作業モード切替 (直射日光ハイコントラスト + 画面スリープ防止 WakeLock を統合) -->
-        <button id="toggleFieldModeBtn" type="button" title="現場モード切替（直射日光表示 ＋ 画面スリープ防止）" class="h-8 px-2.5 rounded-lg bg-pitch-900/80 hover:bg-black text-amber-300 font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
+        <!-- 屋外モード切替 (直射日光ハイコントラスト + 画面スリープ防止 WakeLock を統合) -->
+        <button id="toggleFieldModeBtn" type="button" title="屋外モード切替（直射日光表示 ＋ 画面スリープ防止）" class="h-8 px-2 rounded-lg bg-pitch-900/80 hover:bg-black text-amber-300 font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
           <span id="fieldModeIcon" class="text-xs">☀️</span>
-          <span class="text-[11px]" id="fieldModeLabel">現場モード</span>
+          <span class="text-[10.5px] sm:text-[11px]" id="fieldModeLabel">屋外モードOFF</span>
         </button>
 
         <!-- 寸法＆URL共有コピー (URL共有と寸法コピーをマージ) -->
@@ -2081,7 +2081,7 @@
       }
     });
 
-    // 現場作業モード切替（直射日光ハイコントラスト ＋ 画面スリープ防止 WakeLock を統合）
+    // 屋外モード切替（直射日光ハイコントラスト ＋ 画面スリープ防止 WakeLock を統合）
     document.getElementById('toggleFieldModeBtn').addEventListener('click', async () => {
       state.sunMode = !state.sunMode;
       const body = document.body;
@@ -2093,7 +2093,7 @@
         body.classList.add('sun-mode');
         btn.classList.add('field-mode-active');
         icon.textContent = '💡';
-        label.textContent = '現場ON';
+        label.textContent = '屋外モードON';
 
         let wakeLockMsg = '';
         if ('wakeLock' in navigator) {
@@ -2110,12 +2110,12 @@
             console.warn('Wake Lock error:', err);
           }
         }
-        showToast(`☀️ 現場モードON（直射日光表示${wakeLockMsg}）`);
+        showToast(`☀️ 屋外モードON（直射日光表示${wakeLockMsg}）`);
       } else {
         body.classList.remove('sun-mode');
         btn.classList.remove('field-mode-active');
         icon.textContent = '☀️';
-        label.textContent = '現場モード';
+        label.textContent = '屋外モードOFF';
 
         if (wakeLockSentinel) {
           try {
@@ -2124,7 +2124,7 @@
           wakeLockSentinel = null;
         }
         state.wakeLockActive = false;
-        showToast('🌿 通常モードに戻しました（画面常時点灯を解除）');
+        showToast('🌿 屋外モードOFF（通常表示に戻しました）');
       }
       saveSettings();
     });
@@ -2434,7 +2434,7 @@
             if (btn && icon && label) {
               btn.classList.add('field-mode-active');
               icon.textContent = '💡';
-              label.textContent = '現場ON';
+              label.textContent = '屋外モードON';
             }
           }
         }
