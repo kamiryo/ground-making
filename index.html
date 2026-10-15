@@ -57,6 +57,14 @@
       color: #000000 !important;
     }
 
+    /* 現場作業モード ON 時のボタンスタイル（通常時・直射日光時問わず高視認性） */
+    .field-mode-active {
+      background-color: #facc15 !important;
+      color: #0f172a !important;
+      border-color: #ffffff !important;
+      font-weight: 900 !important;
+    }
+
     /* 現場での片手操作用タップ改善 */
     button, input, select {
       touch-action: manipulation;
@@ -117,43 +125,32 @@
 
   <!-- ヘッダー -->
   <header class="bg-pitch-800 text-white sticky top-0 z-40 shadow-md transition-colors duration-200">
-    <div class="max-w-md mx-auto px-3 py-2.5 flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <span class="text-2xl">⚽</span>
-        <div>
-          <h1 class="text-base font-extrabold tracking-tight leading-tight">グランドメイキング</h1>
-          <p class="text-[10px] text-pitch-100 font-medium">少年サッカー・8人制 コート設営ナビ</p>
+    <div class="max-w-md mx-auto px-3 py-2 flex items-center justify-between">
+      <div class="flex items-center space-x-2 min-w-0 flex-shrink">
+        <span class="text-2xl flex-shrink-0">⚽</span>
+        <div class="min-w-0">
+          <h1 class="text-base font-extrabold tracking-tight leading-tight whitespace-nowrap">グランドメイキング</h1>
+          <p class="text-[10px] text-pitch-100 font-medium whitespace-nowrap">少年サッカー・8人制 コート設営ナビ</p>
         </div>
       </div>
       
       <!-- ヘッダー便利機能ボタン -->
-      <div class="flex items-center space-x-1.5 no-print">
-        <!-- 屋外直射日光モード切替 -->
-        <button id="toggleSunBtn" title="直射日光モード切替" class="px-2 py-1.5 rounded-lg bg-pitch-900/80 hover:bg-black text-amber-300 font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95">
-          <span id="sunIcon">☀️</span>
-          <span class="text-[11px] hidden sm:inline" id="sunLabel">直射日光</span>
+      <div class="flex items-center space-x-1.5 flex-shrink-0 no-print">
+        <!-- 現場作業モード切替 (直射日光ハイコントラスト + 画面スリープ防止 WakeLock を統合) -->
+        <button id="toggleFieldModeBtn" type="button" title="現場モード切替（直射日光表示 ＋ 画面スリープ防止）" class="h-8 px-2.5 rounded-lg bg-pitch-900/80 hover:bg-black text-amber-300 font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
+          <span id="fieldModeIcon" class="text-xs">☀️</span>
+          <span class="text-[11px]" id="fieldModeLabel">現場モード</span>
         </button>
 
-        <!-- 画面常時点灯 (Wake Lock) -->
-        <button id="wakeLockBtn" title="画面のスリープ防止" class="px-2 py-1.5 rounded-lg bg-pitch-900/80 hover:bg-black text-white font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95">
-          <span id="wakeLockIcon">💡</span>
-          <span class="text-[11px] hidden sm:inline" id="wakeLockText">常時ON</span>
-        </button>
-
-        <!-- URL共有ボタン -->
-        <button id="shareUrlBtn" title="寸法共有URLをコピー" class="px-2 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs flex items-center space-x-1 border border-amber-300 shadow-sm transition active:scale-95">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-          <span class="text-[11px] hidden sm:inline">URL共有</span>
-        </button>
-
-        <!-- LINE共有用コピー -->
-        <button id="shareSummaryBtn" title="設営寸法テキストをコピー" class="p-1.5 rounded-lg bg-pitch-700 hover:bg-pitch-600 text-white font-bold text-xs border border-pitch-600 transition active:scale-95">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+        <!-- 寸法＆URL共有コピー (URL共有と寸法コピーをマージ) -->
+        <button id="shareSummaryBtn" type="button" title="寸法テキストと共有URLを一括コピー（LINE共有等）" class="h-8 px-2.5 rounded-lg bg-pitch-900/80 hover:bg-black text-white font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
+          <svg class="w-3.5 h-3.5 text-amber-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+          <span class="text-[11px]">コピー</span>
         </button>
 
         <!-- 印刷 / PDF -->
-        <button onclick="window.print()" title="印刷・PDF保存" class="p-1.5 rounded-lg bg-pitch-700 hover:bg-pitch-600 text-white font-bold text-xs border border-pitch-600 transition active:scale-95">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        <button onclick="window.print()" type="button" title="印刷・PDF保存" class="h-8 w-8 rounded-lg bg-pitch-900/80 hover:bg-black text-white font-bold text-xs flex items-center justify-center border border-pitch-600 transition active:scale-95 flex-shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
         </button>
       </div>
     </div>
@@ -2084,65 +2081,58 @@
       }
     });
 
-    // 屋外直射日光モード切替
-    document.getElementById('toggleSunBtn').addEventListener('click', () => {
+    // 現場作業モード切替（直射日光ハイコントラスト ＋ 画面スリープ防止 WakeLock を統合）
+    document.getElementById('toggleFieldModeBtn').addEventListener('click', async () => {
       state.sunMode = !state.sunMode;
       const body = document.body;
-      const sunIcon = document.getElementById('sunIcon');
-      const sunLabel = document.getElementById('sunLabel');
+      const btn = document.getElementById('toggleFieldModeBtn');
+      const icon = document.getElementById('fieldModeIcon');
+      const label = document.getElementById('fieldModeLabel');
 
       if (state.sunMode) {
         body.classList.add('sun-mode');
-        sunIcon.textContent = '🌿';
-        sunLabel.textContent = '通常表示';
-        showToast('☀️ 直射日光ハイコントラストモードに切替えました');
+        btn.classList.add('field-mode-active');
+        icon.textContent = '💡';
+        label.textContent = '現場ON';
+
+        let wakeLockMsg = '';
+        if ('wakeLock' in navigator) {
+          try {
+            if (!state.wakeLockActive) {
+              wakeLockSentinel = await navigator.wakeLock.request('screen');
+              state.wakeLockActive = true;
+              wakeLockSentinel.addEventListener('release', () => {
+                state.wakeLockActive = false;
+              });
+              wakeLockMsg = '＋画面常時点灯';
+            }
+          } catch (err) {
+            console.warn('Wake Lock error:', err);
+          }
+        }
+        showToast(`☀️ 現場モードON（直射日光表示${wakeLockMsg}）`);
       } else {
         body.classList.remove('sun-mode');
-        sunIcon.textContent = '☀️';
-        sunLabel.textContent = '直射日光';
-        showToast('🌿 通常モードに戻しました');
+        btn.classList.remove('field-mode-active');
+        icon.textContent = '☀️';
+        label.textContent = '現場モード';
+
+        if (wakeLockSentinel) {
+          try {
+            await wakeLockSentinel.release();
+          } catch (e) {}
+          wakeLockSentinel = null;
+        }
+        state.wakeLockActive = false;
+        showToast('🌿 通常モードに戻しました（画面常時点灯を解除）');
       }
       saveSettings();
     });
 
-    // 画面スリープ防止 (Screen Wake Lock API)
-    document.getElementById('wakeLockBtn').addEventListener('click', async () => {
-      if ('wakeLock' in navigator) {
-        try {
-          if (!state.wakeLockActive) {
-            wakeLockSentinel = await navigator.wakeLock.request('screen');
-            state.wakeLockActive = true;
-            document.getElementById('wakeLockBtn').classList.add('bg-amber-400', 'text-black', 'border-amber-300');
-            document.getElementById('wakeLockText').textContent = '常時ON中';
-            showToast('💡 画面スリープを防止しています');
-
-            wakeLockSentinel.addEventListener('release', () => {
-              state.wakeLockActive = false;
-              document.getElementById('wakeLockBtn').classList.remove('bg-amber-400', 'text-black', 'border-amber-300');
-              document.getElementById('wakeLockText').textContent = '常時ON';
-            });
-          } else {
-            if (wakeLockSentinel) {
-              await wakeLockSentinel.release();
-              wakeLockSentinel = null;
-            }
-            state.wakeLockActive = false;
-            document.getElementById('wakeLockBtn').classList.remove('bg-amber-400', 'text-black', 'border-amber-300');
-            document.getElementById('wakeLockText').textContent = '常時ON';
-            showToast('画面スリープ防止を解除しました');
-          }
-        } catch (err) {
-          console.warn('Wake Lock error:', err);
-          showToast('このブラウザでは画面常時ONが制限されています');
-        }
-      } else {
-        showToast('お使いのブラウザは画面常時ON機能に非対応です');
-      }
-    });
-
-    // LINE共有用サマリーコピー
+    // 寸法テキスト＆共有URLの一括コピー（LINE共有等）
     document.getElementById('shareSummaryBtn').addEventListener('click', () => {
       const data = calculatePitchData();
+      const shareUrl = getShareableURL();
       const text = [
         `【⚽ グランドメイキング 設営寸法メモ】`,
         `■ コートサイズ: 縦${data.length.toFixed(1)}m × 横${data.width.toFixed(1)}m (ゴール幅${data.goalWidth.toFixed(1)}m)`,
@@ -2164,15 +2154,19 @@
         `${(data.width - (data.width - data.paWidth)/2).toFixed(1)}m: PA右端`,
         `${data.width.toFixed(1)}m: 反対コーナー`,
         `----------------`,
-        `Webツールで確認: ${getShareableURL()}`
+        `🔗 Webツールで確認・再現: ${shareUrl}`
       ].join('\n');
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-          showToast('📋 LINE共有用の設営テキストをコピーしました！');
-        }).catch(() => fallbackCopy(text));
+          showToast('📋 寸法テキストと共有URLをコピーしました！LINE等に貼付けできます');
+        }).catch(() => {
+          fallbackCopy(text);
+          showToast('📋 寸法テキストと共有URLをコピーしました！');
+        });
       } else {
         fallbackCopy(text);
+        showToast('📋 寸法テキストと共有URLをコピーしました！');
       }
     });
 
@@ -2434,8 +2428,14 @@
           if (loaded.sunMode) {
             state.sunMode = true;
             document.body.classList.add('sun-mode');
-            document.getElementById('sunIcon').textContent = '🌿';
-            document.getElementById('sunLabel').textContent = '通常表示';
+            const btn = document.getElementById('toggleFieldModeBtn');
+            const icon = document.getElementById('fieldModeIcon');
+            const label = document.getElementById('fieldModeLabel');
+            if (btn && icon && label) {
+              btn.classList.add('field-mode-active');
+              icon.textContent = '💡';
+              label.textContent = '現場ON';
+            }
           }
         }
       } catch (e) {}
