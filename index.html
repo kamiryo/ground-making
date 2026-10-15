@@ -126,26 +126,26 @@
   <!-- ヘッダー -->
   <header class="bg-pitch-800 text-white sticky top-0 z-40 shadow-md transition-colors duration-200">
     <div class="max-w-md mx-auto px-3 py-2 flex items-center justify-between">
-      <div class="flex items-center space-x-2 min-w-0 flex-shrink">
-        <span class="text-2xl flex-shrink-0">⚽</span>
+      <div class="flex items-center space-x-1.5 min-w-0 flex-shrink">
+        <span class="text-xl flex-shrink-0">⚽</span>
         <div class="min-w-0">
-          <h1 class="text-base font-extrabold tracking-tight leading-tight whitespace-nowrap">グランドメイキング</h1>
-          <p class="text-[10px] text-pitch-100 font-medium whitespace-nowrap">少年サッカー・8人制</p>
+          <h1 class="text-[14.5px] sm:text-base font-extrabold tracking-tight leading-tight whitespace-nowrap">グランドメイキング</h1>
+          <p class="text-[9.5px] sm:text-[10px] text-pitch-100 font-medium whitespace-nowrap">少年サッカー・8人制</p>
         </div>
       </div>
       
       <!-- ヘッダー便利機能ボタン -->
-      <div class="flex items-center space-x-1.5 flex-shrink-0 no-print">
+      <div class="flex items-center space-x-1 sm:space-x-1.5 flex-shrink-0 no-print">
         <!-- 屋外モード切替 (直射日光ハイコントラスト + 画面スリープ防止 WakeLock を統合) -->
-        <button id="toggleFieldModeBtn" type="button" title="屋外モード切替（直射日光表示 ＋ 画面スリープ防止）" class="h-8 px-2 rounded-lg bg-pitch-900/80 hover:bg-black text-amber-300 font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
+        <button id="toggleFieldModeBtn" type="button" title="屋外モード切替（直射日光表示 ＋ 画面スリープ防止）" class="h-8 px-1.5 sm:px-2 rounded-lg bg-pitch-900/80 hover:bg-black text-amber-300 font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
           <span id="fieldModeIcon" class="text-xs">☀️</span>
-          <span class="text-[10.5px] sm:text-[11px]" id="fieldModeLabel">屋外モードOFF</span>
+          <span class="text-[10px] sm:text-[11px]" id="fieldModeLabel">屋外モードOFF</span>
         </button>
 
         <!-- 寸法＆URL共有コピー (URL共有と寸法コピーをマージ) -->
-        <button id="shareSummaryBtn" type="button" title="寸法テキストと共有URLを一括コピー（LINE共有等）" class="h-8 px-2.5 rounded-lg bg-pitch-900/80 hover:bg-black text-white font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
+        <button id="shareSummaryBtn" type="button" title="寸法テキストと共有URLを一括コピー（LINE共有等）" class="h-8 px-1.5 sm:px-2 rounded-lg bg-pitch-900/80 hover:bg-black text-white font-bold text-xs flex items-center space-x-1 border border-pitch-600 transition active:scale-95 flex-shrink-0 whitespace-nowrap">
           <svg class="w-3.5 h-3.5 text-amber-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-          <span class="text-[11px]">コピー</span>
+          <span class="text-[10px] sm:text-[11px]">寸法を共有</span>
         </button>
 
         <!-- 印刷 / PDF -->
